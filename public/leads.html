@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saheehisab AI — Leads Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:#0A0A0A; --black-2:#111; --black-3:#1A1A1A; --black-4:#242424;
+      --gold:#C9A84C; --gold-l:#E2C27D; --gold-dim:#8B6914; --gold-bg:#1C1608;
+      --white:#F5F0E8; --white-dim:#A89F8C; --green:#4CAF7D; --red:#E05050;
+      --blue:#5B9BD5; --orange:#E8943A;
+      --font-d:'Cormorant Garamond',serif; --font-b:'Inter',sans-serif;
+      --r:8px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}.logo span{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim);margin-left:14px}
+    .nav-links{display:flex;gap:10px}
+    .nav-link{font-size:12px;color:var(--white-dim);text-decoration:none;border:1px solid rgba(201,168,76,.2);padding:7px 14px;border-radius:var(--r);transition:.2s}
+    .nav-link:hover{color:var(--gold);border-color:var(--gold)}
+
+    .page{max-width:1200px;margin:0 auto;padding:32px 24px 80px}
+    h1{font-family:var(--font-d);font-size:28px;color:var(--white);margin-bottom:4px}
+    .subtitle{color:var(--white-dim);font-size:13px;margin-bottom:28px}
+
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+    .stat-card{background:var(--black-2);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);padding:16px 18px}
+    .stat-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);margin-bottom:6px}
+    .stat-value{font-family:var(--font-d);font-size:26px;font-weight:600;color:var(--gold)}
+    .stat-card.green .stat-value{color:var(--green)}
+    .stat-card.blue  .stat-value{color:var(--blue)}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .search-input{flex:1;min-width:200px;padding:9px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:13px;outline:none;transition:.2s}
+    .search-input:focus{border-color:var(--gold)}
+    .filter-btn{padding:8px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);color:var(--white-dim);font-size:12px;font-weight:500;cursor:pointer;transition:.2s}
+    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
+    .btn-export{padding:8px 16px;background:var(--gold);color:var(--black);border:none;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+    .btn-export:hover{background:var(--gold-l)}
+    .btn-clear-all{padding:8px 14px;background:transparent;border:1px solid rgba(224,80,80,.3);border-radius:var(--r);color:var(--red);font-size:12px;cursor:pointer;transition:.2s}
+    .btn-clear-all:hover{background:rgba(224,80,80,.1)}
+
+    /* Table */
+    .table-wrap{overflow-x:auto;border:1px solid rgba(201,168,76,.15);border-radius:var(--r)}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--black-3)}
+    th{padding:12px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.15);white-space:nowrap}
+    td{padding:12px 14px;font-size:13px;color:var(--white);border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(201,168,76,.03)}
+
+    .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.04em}
+    .badge-url    {background:rgba(91,155,213,.15);color:var(--blue)}
+    .badge-image  {background:rgba(201,168,76,.15);color:var(--gold)}
+    .badge-invoice{background:rgba(76,175,125,.15);color:var(--green)}
+    .badge-enquiry{background:rgba(232,148,58,.15);color:var(--orange)}
+    .badge-manual {background:rgba(160,100,200,.15);color:#C084FC}
+
+    .savings-positive{color:var(--green);font-weight:600}
+    .savings-zero{color:var(--white-dim)}
+
+    .device-icon{font-size:16px}
+    .url-cell{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--white-dim);font-size:12px}
+    .url-cell a{color:var(--gold-dim);text-decoration:none}
+    .url-cell a:hover{color:var(--gold)}
+
+    .btn-del{background:none;border:none;color:rgba(224,80,80,.4);cursor:pointer;font-size:14px;padding:4px;transition:.2s}
+    .btn-del:hover{color:var(--red)}
+
+    /* Expanded detail */
+    .detail-row td{background:var(--black-3);padding:14px 20px;font-size:12px;color:var(--white-dim)}
+    .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+    .detail-item{background:var(--black-4);border:1px solid rgba(201,168,76,.1);border-radius:6px;padding:10px 12px}
+    .detail-item label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-dim);display:block;margin-bottom:4px}
+    .detail-item span{color:var(--white);font-size:13px;word-break:break-all}
+
+    /* Pagination */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px}
+    .page-btn{padding:6px 12px;background:var(--black-3);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);color:var(--white-dim);font-size:12px;cursor:pointer;transition:.2s}
+    .page-btn:hover,.page-btn.active{border-color:var(--gold);color:var(--gold)}
+    .page-btn:disabled{opacity:.3;cursor:not-allowed}
+    .page-info{font-size:12px;color:var(--white-dim);margin:0 8px}
+
+    .empty-state{text-align:center;padding:60px 20px;color:var(--white-dim)}
+    .empty-state .empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+
+    .loading-row td{text-align:center;padding:40px;color:var(--white-dim)}
+
+    @media(max-width:768px){
+      .stats-row{grid-template-columns:1fr 1fr}
+      .toolbar{flex-direction:column;align-items:stretch}
+      .search-input{min-width:unset}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em> <span>Leads</span></div>
+  <div class="nav-links">
+    <a href="/" class="nav-link">← App</a>
+    <a href="/admin.html" class="nav-link">⚙ Admin</a>
+    <a href="#" class="nav-link" id="tab-leads-btn" onclick="event.preventDefault();showLeadsTab()" style="color:var(--gold);border-color:var(--gold)">📋 Leads</a>
+    <a href="#" class="nav-link" id="tab-customers-btn" onclick="event.preventDefault();showCustomersTab()">👥 Customers</a>
+    <a href="/catalogue-admin.html" class="nav-link">📖 Catalogue</a>
+    <a href="/login.html?profile=1" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<div id="main-content">
+<div class="page" id="leads-wrap">
+  <h1>Customer Leads</h1>
+  <p class="subtitle">Every URL analysis, image upload, and invoice scan is recorded here automatically.</p>
+
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat-card blue"><div class="stat-label">URL Analyses</div><div class="stat-value" id="stat-url">—</div></div>
+    <div class="stat-card"><div class="stat-label">Image Uploads</div><div class="stat-value" id="stat-image">—</div></div>
+    <div class="stat-card"><div class="stat-label">Invoice Scans</div><div class="stat-value" id="stat-invoice">—</div></div>
+    <div class="stat-card"><div class="stat-label">Enquiries</div><div class="stat-value" id="stat-enquiry">—</div></div>
+    <div class="stat-card green"><div class="stat-label">Total Savings Shown</div><div class="stat-value" id="stat-savings">—</div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input type="text" class="search-input" id="search-input" placeholder="Search product, URL, IP…" oninput="debounceSearch()" />
+    <button class="filter-btn active" data-type="" onclick="setFilter(this, '')">All</button>
+    <button class="filter-btn" data-type="url"     onclick="setFilter(this, 'url')">🔗 URL</button>
+    <button class="filter-btn" data-type="image"   onclick="setFilter(this, 'image')">📷 Image</button>
+    <button class="filter-btn" data-type="invoice" onclick="setFilter(this, 'invoice')">🧾 Invoice</button>
+    <button class="filter-btn" data-type="enquiry" onclick="setFilter(this, 'enquiry')">📩 Enquiry</button>
+    <button class="btn-export" onclick="exportCSV()">📄 CSV</button>
+    <a href="/export/leads/excel" class="btn-export" style="background:#1e3a1e;border-color:rgba(76,175,125,.3);color:#4CAF7D;text-decoration:none;display:inline-flex;align-items:center">📊 Excel</a>
+    <button class="btn-clear-all" onclick="clearAll()">🗑 Clear All</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table id="leads-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Product</th>
+          <th>Jewellery</th>
+          <th>Website Price</th>
+          <th>Our Price</th>
+          <th>Savings</th>
+          <th>Device</th>
+          <th>IP</th>
+          <th>Source</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="leads-body">
+        <tr class="loading-row"><td colspan="13">Loading leads…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+  var currentPage   = 1;
+  var currentType   = '';
+  var currentSearch = '';
+  var searchTimer   = null;
+  var allLeadsCache = [];
+
+  function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+      currentSearch = document.getElementById('search-input').value;
+      currentPage   = 1;
+      loadLeads();
+    }, 300);
+  }
+
+  function setFilter(btn, type) {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentType = type;
+    currentPage = 1;
+    loadLeads();
+  }
+
+  async function loadLeads() {
+    var params = '?page=' + currentPage + '&limit=25';
+    if (currentType)   params += '&type='   + currentType;
+    if (currentSearch) params += '&search=' + encodeURIComponent(currentSearch);
+
+    try {
+      var res  = await fetch('/leads' + params);
+      var json = await res.json();
+      if (!json.success) throw new Error('Failed');
+
+      allLeadsCache = json.leads;
+      renderStats(json.stats);
+      renderTable(json.leads, json.total, json.page, json.pages);
+    } catch(err) {
+      document.getElementById('leads-body').innerHTML = '<tr class="loading-row"><td colspan="13">Failed to load leads. ' + err.message + '</td></tr>';
+    }
+  }
+
+  function renderStats(stats) {
+    document.getElementById('stat-total').textContent   = (stats.total || 0).toLocaleString('en-IN');
+    document.getElementById('stat-url').textContent     = (stats.by_type.url     || 0).toLocaleString('en-IN');
+    document.getElementById('stat-image').textContent   = (stats.by_type.image   || 0).toLocaleString('en-IN');
+    document.getElementById('stat-invoice').textContent = (stats.by_type.invoice || 0).toLocaleString('en-IN');
+    document.getElementById('stat-enquiry').textContent = (stats.by_type.enquiry || 0).toLocaleString('en-IN');
+    var sav = parseFloat(stats.total_savings_shown) || 0;
+    document.getElementById('stat-savings').textContent = sav >= 100000
+      ? '₹' + (sav / 100000).toFixed(1) + 'L'
+      : '₹' + Math.round(sav).toLocaleString('en-IN');
+  }
+
+  function renderTable(leads, total, page, pages) {
+    var tbody = document.getElementById('leads-body');
+
+    if (!leads.length) {
+      tbody.innerHTML = '<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📋</div><p>No leads yet. Every analysis will appear here automatically.</p></div></td></tr>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    var startNum = (page - 1) * 25;
+    tbody.innerHTML = leads.map(function(lead, i) {
+      var dt      = new Date(lead.timestamp);
+      var timeStr = dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) + ' ' + dt.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      var savings = parseFloat(lead.estimated_savings) || 0;
+      var savClass= savings > 0 ? 'savings-positive' : 'savings-zero';
+      var savStr  = savings > 0 ? '+₹' + Math.round(savings).toLocaleString('en-IN') : '—';
+      var device  = lead.client ? (lead.client.device === 'Mobile' ? '📱' : '💻') : '—';
+      var ip      = lead.client ? lead.client.ip : '—';
+      var src     = lead.source_url && lead.source_url !== 'image-upload' && lead.source_url !== 'invoice-upload'
+        ? '<a href="' + lead.source_url + '" target="_blank">🔗 Link</a>'
+        : (lead.source_url || '—');
+
+      var typeClass = 'badge-' + (lead.type || 'url');
+      var typeName  = (lead.type || 'url').toUpperCase();
+
+      // Image thumbnail + share link
+      var imgCell = '—';
+      if (lead.image_url) {
+        imgCell = '<a href="' + lead.image_url + '" target="_blank"><img src="' + lead.image_url + '" style="width:40px;height:40px;object-fit:cover;border-radius:5px;border:1px solid rgba(201,168,76,.3)" /></a>';
+      }
+      var shareCell = lead.share_id
+        ? '<a href="/share/' + lead.share_id + '" target="_blank" style="color:var(--gold);font-size:11px">🔗 Share</a>'
+        : src;
+
+      return '<tr onclick="toggleDetail(this, \'' + lead.id + '\')" style="cursor:pointer">' +
+        '<td style="white-space:nowrap;font-size:12px;color:var(--white-dim)">' + timeStr + '</td>' +
+        '<td><span class="badge ' + typeClass + '">' + typeName + '</span></td>' +
+        '<td>' + imgCell + '</td>' +
+        '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + (lead.product_name||'') + '">' + (lead.product_name || '—') + '</td>' +
+        '<td style="color:var(--white-dim);font-size:12px">' + (lead.jewellery_type || '—') + '</td>' +
+        '<td>' + (lead.website_price ? '₹' + parseFloat(lead.website_price).toLocaleString('en-IN') : '—') + '</td>' +
+        '<td style="color:var(--gold)">' + (lead.saheehisab_price ? '₹' + parseFloat(lead.saheehisab_price).toLocaleString('en-IN') : '—') + '</td>' +
+        '<td class="' + savClass + '">' + savStr + '</td>' +
+        '<td class="device-icon" title="' + (lead.client ? lead.client.browser : '') + '">' + device + '</td>' +
+        '<td style="font-size:12px;color:var(--white-dim);font-family:monospace">' + ip + '</td>' +
+        '<td class="url-cell">' + shareCell + '</td>' +
+        '<td><button class="btn-del" onclick="deleteLead(event,\'' + lead.id + '\')">✕</button></td>' +
+        '</tr>' +
+        '<tr class="detail-row hidden" id="detail-' + lead.id + '"><td colspan="13">' + buildDetail(lead) + '</td></tr>';
+    }).join('');
+
+    // Pagination
+    var pag = document.getElementById('pagination');
+    if (pages <= 1) { pag.innerHTML = ''; return; }
+    var html = '<button class="page-btn" onclick="gotoPage(' + (page-1) + ')" ' + (page <= 1 ? 'disabled' : '') + '>← Prev</button>';
+    html += '<span class="page-info">Page ' + page + ' of ' + pages + ' (' + total + ' total)</span>';
+    html += '<button class="page-btn" onclick="gotoPage(' + (page+1) + ')" ' + (page >= pages ? 'disabled' : '') + '>Next →</button>';
+    pag.innerHTML = html;
+  }
+
+  function buildDetail(lead) {
+    var client  = lead.client || {};
+    var fields  = [
+      { label:'Lead ID',          value: lead.id },
+      { label:'Image URL',         value: lead.image_url ? '<a href="' + lead.image_url + '" target="_blank">View Image</a>' : '—' },
+      { label:'Share Link',        value: lead.share_id ? '<a href="/share/' + lead.share_id + '" target="_blank">/share/' + lead.share_id + '</a>' : '—' },
+      { label:'Full Timestamp',   value: lead.timestamp },
+      { label:'Source Type',      value: lead.type },
+      { label:'Metal',            value: lead.metal || '—' },
+      { label:'Purity',           value: lead.purity || '—' },
+      { label:'Gold Weight',      value: lead.gold_weight ? lead.gold_weight + 'g' : '—' },
+      { label:'Stones',           value: lead.stones || '—' },
+      { label:'Shop Name',        value: lead.shop_name || '—' },
+      { label:'Invoice No.',      value: lead.invoice_number || '—' },
+      { label:'Customer Name',    value: lead.name || '—' },
+      { label:'Phone',            value: lead.phone || '—' },
+      { label:'Email',            value: lead.email || '—' },
+      { label:'Message',          value: lead.message || '—' },
+      { label:'IP Address',       value: client.ip || '—' },
+      { label:'Device',           value: client.device || '—' },
+      { label:'Browser',          value: client.browser || '—' },
+      { label:'Language',         value: client.language || '—' },
+      { label:'Referer',          value: client.referer || '—' },
+    ];
+    return '<div class="detail-grid">' + fields.map(function(f) {
+      return '<div class="detail-item"><label>' + f.label + '</label><span>' + (f.value || '—') + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  function toggleDetail(row, id) {
+    var detail = document.getElementById('detail-' + id);
+    if (detail) { detail.classList.toggle('hidden'); }
+  }
+
+  async function deleteLead(e, id) {
+    e.stopPropagation();
+    if (!confirm('Delete this lead?')) return;
+    await fetch('/leads/' + id, { method:'DELETE' });
+    loadLeads();
+  }
+
+  async function clearAll() {
+    if (!confirm('Delete ALL leads? This cannot be undone.')) return;
+    await fetch('/leads', { method:'DELETE' });
+    loadLeads();
+  }
+
+  function gotoPage(p) {
+    currentPage = p;
+    loadLeads();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function exportCSV() {
+    var leads = allLeadsCache;
+    if (!leads.length) { alert('No leads to export.'); return; }
+    var headers = ['ID','Timestamp','Type','Product Name','Jewellery Type','Metal','Purity','Gold Weight','Stones','Website Price','Saheehisab Price','Savings','Name','Phone','Email','IP','Device','Browser','Source URL'];
+    var rows = leads.map(function(l) {
+      var c = l.client || {};
+      return [
+        l.id, l.timestamp, l.type,
+        '"' + (l.product_name||'').replace(/"/g,'""') + '"',
+        l.jewellery_type||'', l.metal||'', l.purity||'', l.gold_weight||'',
+        '"' + (l.stones||'').replace(/"/g,'""') + '"',
+        l.website_price||'', l.saheehisab_price||'', l.estimated_savings||'',
+        l.name||'', l.phone||'', l.email||'',
+        c.ip||'', c.device||'', c.browser||'',
+        '"' + (l.source_url||'').replace(/"/g,'""') + '"',
+      ].join(',');
+    });
+    var csv     = headers.join(',') + '\n' + rows.join('\n');
+    var blob    = new Blob([csv], { type:'text/csv' });
+    var url     = URL.createObjectURL(blob);
+    var a       = document.createElement('a');
+    a.href      = url;
+    a.download  = 'saheehisab-leads-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Auto-refresh every 30s
+  loadLeads();
+  setInterval(loadLeads, 30000);
+</script>
+
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+
+<!-- CUSTOMERS PANEL -->
+<div id="customers-panel" style="display:none;position:fixed;inset:0;background:#0A0A0A;z-index:100;overflow-y:auto;padding:24px 32px">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:14px"><button onclick="event.preventDefault();showLeadsTab()" style="background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px 14px;color:var(--white-dim);cursor:pointer;font-size:13px">← Back to Leads</button><h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--white)">Customer Profiles</h2></div>
+    <div id="cust-stats" style="font-size:13px;color:var(--white-dim)">Loading…</div>
+  </div>
+
+  <!-- Search -->
+  <div style="display:flex;gap:10px;margin-bottom:20px">
+    <input type="text" id="cust-search" placeholder="Search by name or phone…"
+      oninput="filterCustomers()"
+      style="flex:1;padding:10px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-size:13px;outline:none"/>
+    <button onclick="loadCustomers()" style="padding:10px 18px;background:var(--gold);color:var(--black);border:none;border-radius:var(--r);font-weight:700;cursor:pointer;font-size:13px">↻ Refresh</button>
+    <button onclick="exportCustomers()" style="padding:10px 18px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--gold);cursor:pointer;font-size:13px">📄 Export CSV</button>
+    <a href="/export/customers/excel" style="padding:10px 18px;background:#1e3a1e;border:1px solid rgba(76,175,125,.3);border-radius:var(--r);color:#4CAF7D;cursor:pointer;font-size:13px;text-decoration:none;display:inline-block">📊 Export Excel</a>
+  </div>
+
+  <!-- Customers Table -->
+  <div style="background:var(--black-2);border:1px solid rgba(201,168,76,.12);border-radius:var(--r);overflow:hidden">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--black-3)">
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">#</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Name</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Phone</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Email</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">City</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Gold (g)</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Analyses</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Savings Shown</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Member Since</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Last Login</th>
+          <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)">Action</th>
+        </tr>
+      </thead>
+      <tbody id="customers-body">
+        <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--white-dim)">Loading customers…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div><!-- end main-content -->
+
+<!-- CUSTOMER DETAIL MODAL -->
+<div id="cust-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:#111;border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:28px;width:100%;max-width:680px;margin:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--white)" id="modal-cust-name">Customer</h3>
+      <button onclick="document.getElementById('cust-modal').style.display='none'" style="background:none;border:none;color:var(--white-dim);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div id="modal-cust-body"></div>
+  </div>
+</div>
+
+<script>
+var allCustomers = [];
+
+function showLeadsTab() {
+  document.getElementById("leads-wrap").style.display = "block";
+  document.getElementById("customers-panel").style.display = "none";
+  document.getElementById("tab-leads-btn").style.color = "#C9A84C";
+  document.getElementById("tab-leads-btn").style.borderColor = "#C9A84C";
+  document.getElementById("tab-customers-btn").style.color = "#A89F8C";
+  document.getElementById("tab-customers-btn").style.borderColor = "rgba(201,168,76,.2)";
+}
+
+function showCustomersTab() {
+  var leadsWrap = document.getElementById("leads-wrap");
+  var custPanel = document.getElementById("customers-panel");
+  if (leadsWrap) leadsWrap.style.display = "none";
+  if (custPanel) { custPanel.style.display = "block"; custPanel.style.maxWidth = "1200px"; custPanel.style.margin = "0 auto"; custPanel.style.padding = "24px"; }
+  document.getElementById("tab-customers-btn").style.color = "#C9A84C";
+  document.getElementById("tab-customers-btn").style.borderColor = "#C9A84C";
+  document.getElementById("tab-leads-btn").style.color = "#A89F8C";
+  document.getElementById("tab-leads-btn").style.borderColor = "rgba(201,168,76,.2)";
+  loadCustomers();
+}
+
+async function loadCustomers() {
+  try {
+    var res  = await fetch("/admin/customers");
+    var json = await res.json();
+    if (!json.success) { alert("Failed to load customers"); return; }
+    allCustomers = json.customers || [];
+    document.getElementById("cust-stats").textContent = "Total: " + allCustomers.length + " customers";
+    renderCustomers(allCustomers);
+  } catch(e) { alert("Error: " + e.message); }
+}
+
+function filterCustomers() {
+  var q = document.getElementById("cust-search").value.toLowerCase();
+  var filtered = allCustomers.filter(function(c) {
+    return (c.name||"").toLowerCase().indexOf(q) !== -1 ||
+           (c.phone||"").indexOf(q) !== -1 ||
+           (c.email||"").toLowerCase().indexOf(q) !== -1;
+  });
+  renderCustomers(filtered);
+}
+
+function renderCustomers(list) {
+  var tbody = document.getElementById("customers-body");
+  if (!list.length) {
+    tbody.innerHTML = "<tr><td colspan=11 style=\"text-align:center;padding:40px;color:#A89F8C\">No customers found</td></tr>";
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < list.length; i++) {
+    var c     = list[i];
+    var since = c.member_since ? new Date(c.member_since).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}) : "-";
+    var last  = c.last_login   ? new Date(c.last_login).toLocaleDateString("en-IN",{day:"2-digit",month:"short"}) : "-";
+    var grams = parseFloat(c.gold_grams||0).toFixed(4);
+    var sav   = c.savings_shown ? "Rs." + Math.round(c.savings_shown).toLocaleString("en-IN") : "-";
+    var ph    = (c.phone||"").replace(/[^0-9]/g,"");
+    html += "<tr style=\"border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer\" onclick=\"viewCustomer('" + ph + "')\">"+
+      "<td style=\"padding:10px 14px;font-size:12px;color:#A89F8C\">" + (i+1) + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:13px;color:#F5F0E8;font-weight:500\">" + (c.name||"-") + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:13px;color:#A89F8C;font-family:monospace\">" + (c.phone||"-") + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:12px;color:#A89F8C\">" + (c.email||"-") + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:12px;color:#A89F8C\">" + (c.city||"-") + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:13px;color:#C9A84C;font-weight:600\">" + grams + "g</td>"+
+      "<td style=\"padding:10px 14px;font-size:13px;color:#F5F0E8\">" + (c.analyses_count||0) + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:13px;color:#4CAF7D\">" + sav + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:11px;color:#A89F8C\">" + since + "</td>"+
+      "<td style=\"padding:10px 14px;font-size:11px;color:#A89F8C\">" + last + "</td>"+
+      "<td style=\"padding:10px 14px\"><button onclick=\"event.stopPropagation();viewCustomer('" + ph + "')\" style=\"padding:5px 12px;background:#1C1608;border:1px solid rgba(201,168,76,.3);border-radius:6px;color:#C9A84C;font-size:11px;cursor:pointer\">View</button></td>"+
+      "</tr>";
+  }
+  tbody.innerHTML = html;
+}
+
+function viewCustomer(phone) {
+  var c = allCustomers.find(function(x) { return (x.phone||"").replace(/[^0-9]/g,"") === phone; });
+  if (!c) return;
+
+  var ph    = (c.phone||"").replace(/[^0-9]/g,"");
+  var since = c.member_since ? new Date(c.member_since).toLocaleDateString("en-IN",{day:"2-digit",month:"long",year:"numeric"}) : "-";
+  var last  = c.last_login   ? new Date(c.last_login).toLocaleString("en-IN") : "-";
+
+  function sec(t) {
+    return '<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.15)">' + t + '</div>';
+  }
+  function inf(label, val) {
+    return '<div style="background:#1A1A1A;border-radius:6px;padding:9px 12px"><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:3px">' + label + '</div><div style="font-size:13px;color:#F5F0E8">' + (val||"-") + '</div></div>';
+  }
+  function sta(val, label, color) {
+    return '<div style="text-align:center;background:#111;border-radius:8px;padding:12px 8px"><div style="font-size:20px;font-weight:700;color:' + (color||"#C9A84C") + '">' + val + '</div><div style="font-size:10px;color:#A89F8C;margin-top:3px">' + label + '</div></div>';
+  }
+  function edf(label, id, val, type) {
+    return '<div style="background:#1A1A1A;border-radius:6px;padding:9px 12px"><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:4px">' + label + '</div><input id="' + id + '" type="' + (type||"text") + '" value="' + val + '" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,.2);color:#F5F0E8;font-size:13px;padding:3px 0;outline:none"></div>';
+  }
+
+  var html = '';
+
+  // Personal info
+  html += sec("Personal Information");
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html += inf("Phone", c.phone) + inf("Email", c.email) + inf("City", c.city) + inf("Member Since", since) + inf("Last Login", last) + inf("DOB", c.dob) + inf("Anniversary", c.anniversary) + inf("Referral", c.referral_used);
+  html += '</div>';
+
+  // Stats
+  html += sec("Activity Summary");
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">';
+  html += sta(c.analyses_count||0, "Analyses", "#C9A84C");
+  html += sta("Rs." + Math.round(c.savings_shown||0).toLocaleString("en-IN"), "Savings", "#4CAF7D");
+  html += sta(c.enquiries_count||0, "Enquiries", "#5B9BD5");
+  html += sta(parseFloat(c.gold_grams||0).toFixed(3)+"g", "Gold", "#C9A84C");
+  html += '</div>';
+
+  // Recent analyses
+  if (c.recent_analyses && c.recent_analyses.length) {
+    html += sec("Recent Analyses (" + (c.analyses_count||0) + " total)");
+    c.recent_analyses.forEach(function(a) {
+      var dt  = a.date ? new Date(a.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short"}) : "-";
+      var img = a.image_url ? '<img src="' + a.image_url + '" style="width:36px;height:36px;object-fit:cover;border-radius:4px;margin-right:8px;vertical-align:middle">' : "";
+      var prd = (a.product||"Product").slice(0,35);
+      var sav = parseFloat(a.savings) > 0 ? '<span style="color:#4CAF7D;font-weight:600">Saved Rs.' + Math.round(a.savings).toLocaleString("en-IN") + '</span>' : "";
+      html += '<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">' + img + '<div style="flex:1"><div style="font-size:12px;color:#F5F0E8">' + prd + '</div><div style="font-size:11px;color:#A89F8C;margin-top:2px">' + dt + ' &middot; ' + (a.type||"").toUpperCase() + (a.store_price ? " &middot; Rs." + Math.round(parseFloat(a.store_price)).toLocaleString("en-IN") : "") + '</div></div><div style="font-size:11px">' + sav + '</div></div>';
+    });
+  }
+
+  // Edit Profile
+  html += sec("Edit Profile");
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+  html += edf("Name","ep-name",c.name||"") + edf("Email","ep-email",c.email||"") + edf("City","ep-city",c.city||"") + edf("DOB","ep-dob",c.dob||"","date") + edf("Anniversary","ep-anniv",c.anniversary||"","date") + edf("Analyses Count","ep-analyses",c.analyses_count||0,"number");
+  html += '</div>';
+  html += '<button onclick="saveCustomerProfile(\'' + ph + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#C9A84C,#E2C27D);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px">Save Profile</button>';
+
+  // Edit Gold
+  html += sec("Edit Digital Gold");
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
+  html += edf("Gold Balance (grams)","eg-grams",parseFloat(c.gold_grams||0).toFixed(4),"number") + edf("Total Invested (Rs)","eg-invested",Math.round(c.total_invested||0),"number");
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">';
+  html += '<select id="eg-type" style="padding:8px;background:#1A1A1A;border:1px solid rgba(201,168,76,.2);border-radius:6px;color:#F5F0E8;font-size:12px"><option value="admin_credit">Credit (Add)</option><option value="admin_debit">Debit (Remove)</option><option value="buy">Buy</option><option value="sell">Sell</option><option value="reward">Reward</option></select>';
+  html += '<input id="eg-txn-grams" type="number" placeholder="Grams" step="0.001" style="padding:8px;background:#1A1A1A;border:1px solid rgba(201,168,76,.2);border-radius:6px;color:#F5F0E8;font-size:12px">';
+  html += '<input id="eg-txn-notes" type="text" placeholder="Note" style="padding:8px;background:#1A1A1A;border:1px solid rgba(201,168,76,.2);border-radius:6px;color:#F5F0E8;font-size:12px">';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html += '<button onclick="saveGoldBalance(\'' + ph + '\')" style="padding:10px;background:linear-gradient(135deg,#C9A84C,#E2C27D);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px">Update Balance</button>';
+  html += '<button onclick="addGoldTransaction(\'' + ph + '\')" style="padding:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.3);border-radius:8px;color:#C9A84C;font-weight:700;cursor:pointer;font-size:13px">Add Transaction</button>';
+  html += '</div>';
+
+  // Actions
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px">';
+  html += '<a href="https://wa.me/' + ph + '" target="_blank" style="padding:11px;background:#25D366;color:#000;border-radius:8px;font-size:13px;font-weight:700;text-align:center;text-decoration:none">WhatsApp</a>';
+  html += '<a href="tel:' + (c.phone||"") + '" style="padding:11px;background:#1A1A1A;border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:13px;color:#C9A84C;text-align:center;text-decoration:none">Call</a>';
+  html += '<button onclick="deleteCustomer(\'' + ph + '\')" style="padding:11px;background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.3);border-radius:8px;font-size:13px;color:#E05050;cursor:pointer">Delete</button>';
+  html += '</div>';
+
+  document.getElementById("modal-cust-name").textContent = (c.name||"Customer") + " Profile";
+  document.getElementById("modal-cust-body").innerHTML = html;
+  document.getElementById("cust-modal").style.display = "flex";
+}
+
+function editField(label, id, value, type) {
+  return "<div style=\"background:#1A1A1A;border-radius:6px;padding:9px 12px\">" +
+    "<div style=\"font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:4px\">" + label + "</div>" +
+    "<input id=\"" + id + "\" type=\"" + (type||"text") + "\" value=\"" + value + "\" style=\"width:100%;background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,.2);color:#F5F0E8;font-size:13px;padding:3px 0;outline:none\">" +
+    "</div>";
+}
+
+async function saveCustomerProfile(phone) {
+  var payload = {
+    phone     : phone,
+    name      : document.getElementById("ep-name").value,
+    email     : document.getElementById("ep-email").value,
+    city      : document.getElementById("ep-city").value,
+    dob       : document.getElementById("ep-dob").value,
+    anniversary: document.getElementById("ep-anniv").value,
+    analyses_count: document.getElementById("ep-analyses").value,
+  };
+  var res  = await fetch("/admin/customer/profile", { method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+  var json = await res.json();
+  if (json.success) { showToast("Profile saved!"); loadCustomers(); }
+  else alert("Error: " + json.error);
+}
+
+async function saveGoldBalance(phone) {
+  var payload = {
+    phone         : phone,
+    gold_grams    : document.getElementById("eg-grams").value,
+    total_invested: document.getElementById("eg-invested").value,
+    admin_note    : "Manual admin update",
+  };
+  var res  = await fetch("/admin/customer/gold", { method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+  var json = await res.json();
+  if (json.success) { showToast("Gold balance updated!"); loadCustomers(); }
+  else alert("Error: " + json.error);
+}
+
+async function addGoldTransaction(phone) {
+  var grams = document.getElementById("eg-txn-grams").value;
+  var notes = document.getElementById("eg-txn-notes").value;
+  var type  = document.getElementById("eg-type").value;
+  if (!grams) { alert("Enter grams amount"); return; }
+  var res  = await fetch("/admin/customer/gold/transaction", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ phone:phone, type:type, grams:parseFloat(grams), notes:notes }) });
+  var json = await res.json();
+  if (json.success) { showToast("Transaction added! New balance: " + parseFloat(json.user.gold_grams).toFixed(4) + "g"); loadCustomers(); }
+  else alert("Error: " + json.error);
+}
+
+async function saveScheme(schemeId) {
+  var payload = {
+    scheme_id     : schemeId,
+    monthly_amount: parseFloat(document.getElementById("sch-amt-" + schemeId).value),
+    paid_months   : parseInt(document.getElementById("sch-paid-" + schemeId).value),
+    status        : document.getElementById("sch-status-" + schemeId).value,
+  };
+  var res  = await fetch("/admin/customer/scheme", { method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
+  var json = await res.json();
+  if (json.success) { showToast("Scheme updated!"); loadCustomers(); }
+  else alert("Error: " + json.error);
+}
+
+async function deleteScheme(schemeId) {
+  if (!confirm("Delete this scheme permanently?")) return;
+  var res  = await fetch("/admin/customer/scheme/" + schemeId, { method:"DELETE" });
+  var json = await res.json();
+  if (json.success) { showToast("Scheme deleted!"); document.getElementById("cust-modal").style.display="none"; loadCustomers(); }
+}
+
+async function deleteCustomer(phone) {
+  if (!confirm("DELETE this customer account permanently? This cannot be undone.")) return;
+  var res  = await fetch("/admin/customer/" + encodeURIComponent(phone), { method:"DELETE" });
+  var json = await res.json();
+  if (json.success) { showToast("Customer deleted!"); document.getElementById("cust-modal").style.display="none"; loadCustomers(); }
+}
+
+function showToast(msg) {
+  var t = document.createElement("div");
+  t.textContent = msg;
+  Object.assign(t.style, {position:"fixed",bottom:"24px",left:"50%",transform:"translateX(-50%)",background:"#C9A84C",color:"#000",padding:"10px 22px",borderRadius:"100px",fontSize:"13px",fontWeight:"700",zIndex:"9999"});
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2500);
+}
+
+function exportCustomers() {
+  var headers = ["Name","Phone","Email","City","Gold(g)","Analyses","Savings","Member Since","Last Login"];
+  var rows = allCustomers.map(function(c) {
+    return [
+      c.name||"", c.phone||"", c.email||"", c.city||"",
+      parseFloat(c.gold_grams||0).toFixed(4),
+      c.analyses_count||0,
+      Math.round(c.savings_shown||0),
+      c.member_since ? new Date(c.member_since).toLocaleDateString("en-IN") : "",
+      c.last_login   ? new Date(c.last_login).toLocaleDateString("en-IN")   : "",
+    ].join(",");
+  });
+  var csv  = [headers.join(",")].concat(rows).join("\n");
+  var blob = new Blob([csv], { type: "text/csv" });
+  var a    = document.createElement("a");
+  a.href   = URL.createObjectURL(blob);
+  a.download = "saheehisab-customers-" + new Date().toISOString().slice(0,10) + ".csv";
+  a.click();
+}
+
+document.getElementById("cust-modal").addEventListener("click", function(e) {
+  if (e.target === this) this.style.display = "none";
+});
+</script>
+
+</body>
+</html>

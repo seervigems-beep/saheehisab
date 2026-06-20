@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  var token    = localStorage.getItem('sh_token');
+  var customer = localStorage.getItem('sh_customer');
+  if (!token || !customer) {
+    // Not logged in — go to login (only once, no loop)
+    if (window.location.pathname !== '/login.html') {
+      window.location.replace('/login.html');
+    }
+  }
+})();
+</script>
+
+<meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saheehisab — Gold Saving Scheme</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--black-4:#242424;--gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;--white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;--font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:10px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}
+    .nav-links{display:flex;gap:8px}
+    .nav-link{font-size:12px;color:var(--white-dim);text-decoration:none;border:1px solid rgba(201,168,76,.2);padding:7px 14px;border-radius:var(--r);transition:.2s}
+    .nav-link:hover,.nav-link.active{color:var(--gold);border-color:var(--gold);background:var(--gold-bg)}
+    .hero{background:linear-gradient(135deg,#0A0A0A,#1C1608,#0A0A0A);padding:60px 24px 40px;text-align:center;border-bottom:1px solid rgba(201,168,76,.1)}
+    .hero-badge{display:inline-block;padding:4px 14px;background:rgba(76,175,125,.15);border:1px solid rgba(76,175,125,.3);border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:16px}
+    .hero h1{font-family:var(--font-d);font-size:clamp(32px,5vw,52px);font-weight:600;color:var(--white);margin-bottom:12px}.hero h1 em{color:var(--gold);font-style:italic}
+    .hero p{font-size:15px;color:var(--white-dim);max-width:540px;margin:0 auto 32px;line-height:1.7}
+    .how-it-works{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+    .hiw-step{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:16px 20px;text-align:center;min-width:150px}
+    .hiw-num{font-family:var(--font-d);font-size:32px;color:var(--gold);font-weight:600;margin-bottom:4px}
+    .hiw-text{font-size:12px;color:var(--white-dim);line-height:1.5}
+    .page{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+    .section-title{font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:6px}
+    .section-sub{font-size:13px;color:var(--white-dim);margin-bottom:24px}
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:40px}
+    .plan-card{background:var(--black-2);border:2px solid rgba(201,168,76,.15);border-radius:16px;padding:24px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+    .plan-card:hover{border-color:rgba(201,168,76,.4)}
+    .plan-card.selected{border-color:var(--gold);background:var(--gold-bg)}
+    .plan-card.popular::before{content:'POPULAR';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 10px;border-radius:100px}
+    .plan-amount{font-family:var(--font-d);font-size:28px;font-weight:600;color:var(--gold)}
+    .plan-label{font-size:11px;color:var(--white-dim);margin-bottom:8px}
+    .plan-grams{font-size:13px;color:var(--white);margin-bottom:4px}
+    .plan-maturity{font-size:11px;color:var(--green)}
+    .signup-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:20px;padding:32px;margin-bottom:40px}
+    .signup-card h3{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:20px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .form-field{display:flex;flex-direction:column;gap:6px}
+    .form-field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .form-field input,.form-field select{padding:12px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none;transition:.2s}
+    .form-field input:focus,.form-field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+    .form-field select option{background:var(--black-3)}
+    .selected-plan-display{background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);padding:16px;margin-bottom:20px}
+    .spd-title{font-size:12px;color:var(--gold-dim);margin-bottom:8px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+    .spd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    .spd-item label{font-size:10px;color:var(--white-dim);display:block;margin-bottom:3px}
+    .spd-item span{font-size:15px;font-weight:600;color:var(--gold)}
+    .btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.35)}
+    .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .benefits-section{margin-bottom:40px}
+    .benefits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .benefit-card{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);padding:20px}
+    .benefit-icon{font-size:28px;margin-bottom:10px}
+    .benefit-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:6px}
+    .benefit-desc{font-size:12px;color:var(--white-dim);line-height:1.6}
+    .active-schemes{margin-bottom:40px}
+    .scheme-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px;margin-bottom:14px}
+    .scheme-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+    .scheme-info h4{font-size:15px;font-weight:600;color:var(--white);margin-bottom:4px}
+    .scheme-info p{font-size:12px;color:var(--white-dim)}
+    .scheme-amount-badge{background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);padding:8px 14px;text-align:center}
+    .scheme-amount-badge .amt{font-family:var(--font-d);font-size:20px;color:var(--gold);font-weight:600;display:block}
+    .scheme-amount-badge .lbl{font-size:10px;color:var(--white-dim)}
+    .progress-wrap{background:var(--black-3);border-radius:100px;height:10px;margin-bottom:10px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:100px;transition:.5s}
+    .progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--white-dim);margin-bottom:12px}
+    .months-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
+    .m-dot{height:24px;border-radius:4px;font-size:9px;display:flex;align-items:center;justify-content:center;color:transparent;cursor:default;transition:.2s}
+    .m-dot.pending{background:var(--black-3);border:1px solid rgba(201,168,76,.1)}
+    .m-dot.paid{background:var(--gold);color:var(--black);font-weight:700}
+    .m-dot.due{background:rgba(232,148,58,.2);border:1px solid rgba(232,148,58,.4);color:#E8943A}
+    .m-dot.free{background:linear-gradient(135deg,var(--green),#2e7d52);color:#fff;font-weight:700}
+    .scheme-actions{display:flex;gap:10px;margin-top:14px}
+    .btn-sm{padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border:1px solid}
+    .btn-sm-gold{background:var(--gold-bg);border-color:rgba(201,168,76,.3);color:var(--gold)}.btn-sm-gold:hover{background:rgba(201,168,76,.2)}
+    .btn-sm-green{background:rgba(76,175,125,.1);border-color:rgba(76,175,125,.3);color:var(--green)}.btn-sm-green:hover{background:rgba(76,175,125,.2)}
+    .empty-state{text-align:center;padding:40px;color:var(--white-dim);background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r)}
+    .calculator{background:var(--black-2);border:1px solid rgba(201,168,76,.15);border-radius:16px;padding:28px;margin-bottom:40px}
+    .calculator h3{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:20px}
+    .calc-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .calc-result{background:var(--gold-bg);border:1px solid rgba(201,168,76,.25);border-radius:var(--r);padding:20px}
+    .calc-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+    .cr-item label{font-size:10px;color:var(--white-dim);display:block;margin-bottom:4px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+    .cr-item span{font-family:var(--font-d);font-size:22px;color:var(--gold);font-weight:600}
+    .hidden{display:none!important}
+    @media(max-width:600px){.form-row,.calc-row{grid-template-columns:1fr}.months-grid{grid-template-columns:repeat(6,1fr)}.how-it-works{flex-direction:column;align-items:center}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em></div>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Price Check</a>
+    <a href="/saving-scheme.html" class="nav-link active">💰 Save Scheme</a>
+    <a href="/digital-gold.html" class="nav-link">🥇 Digital Gold</a>
+    <a href="/login.html?profile=1" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">✦ Gold Saving Scheme</div>
+  <h1>Save Monthly.<br/><em>Get 12th Month FREE.</em></h1>
+  <p>Join our gold saving scheme. Pay for 11 months and the 12th month is on us. At maturity, redeem as jewellery with <strong style="color:var(--gold)">50% off making charges</strong>.</p>
+  <div class="how-it-works">
+    <div class="hiw-step"><div class="hiw-num">1</div><div class="hiw-text">Choose monthly amount</div></div>
+    <div class="hiw-step"><div class="hiw-num">11</div><div class="hiw-text">Pay for 11 months</div></div>
+    <div class="hiw-step" style="background:rgba(76,175,125,.08);border-color:rgba(76,175,125,.3)"><div class="hiw-num" style="color:var(--green)">FREE</div><div class="hiw-text">12th month from Saheehisab</div></div>
+    <div class="hiw-step"><div class="hiw-num">💎</div><div class="hiw-text">Redeem jewellery at 50% off making</div></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Calculator -->
+  <div class="calculator">
+    <h3>Calculate Your Returns</h3>
+    <div class="calc-row">
+      <div class="form-field">
+        <label>Monthly Saving Amount (₹)</label>
+        <input type="number" id="calc-amount" placeholder="e.g. 2000" oninput="runCalculator()" />
+      </div>
+      <div class="form-field">
+        <label>Duration</label>
+        <select id="calc-duration" onchange="runCalculator()">
+          <option value="12">12 months (standard)</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+        </select>
+      </div>
+    </div>
+    <div class="calc-result" id="calc-result" style="display:none">
+      <div class="calc-result-grid">
+        <div class="cr-item"><label>You Pay</label><span id="cr-you-pay">₹0</span></div>
+        <div class="cr-item"><label>Saheehisab Adds</label><span id="cr-bonus" style="color:var(--green)">₹0</span></div>
+        <div class="cr-item"><label>Total Gold Value</label><span id="cr-total">₹0</span></div>
+        <div class="cr-item"><label>Approx. Gold Grams</label><span id="cr-grams">0g</span></div>
+        <div class="cr-item"><label>Making Charge Saving</label><span id="cr-making-save" style="color:var(--green)">₹0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Selection -->
+  <div class="section-title">Choose Your Monthly Plan</div>
+  <div class="section-sub">Select how much you want to save each month</div>
+  <div class="plans-grid" id="plans-grid">
+    <!-- Filled by JS -->
+  </div>
+
+  <!-- Sign Up Form -->
+  <div class="signup-card" id="signup-card">
+    <h3>Start Your Gold Saving Journey</h3>
+    <div class="selected-plan-display" id="selected-plan-display">
+      <div class="spd-title">Selected Plan Summary</div>
+      <div class="spd-grid">
+        <div class="spd-item"><label>Monthly Amount</label><span id="spd-amount">—</span></div>
+        <div class="spd-item"><label>Duration</label><span id="spd-duration">12 months</span></div>
+        <div class="spd-item"><label>You Pay Total</label><span id="spd-you-pay">—</span></div>
+        <div class="spd-item"><label>Bonus (12th month)</label><span id="spd-bonus" style="color:var(--green)">—</span></div>
+        <div class="spd-item"><label>Total Value</label><span id="spd-total">—</span></div>
+        <div class="spd-item"><label>Making Saving</label><span id="spd-making" style="color:var(--green)">—</span></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Full Name</label>
+        <input type="text" id="s-name" placeholder="Your full name" />
+      </div>
+      <div class="form-field">
+        <label>Phone Number</label>
+        <input type="tel" id="s-phone" placeholder="+91 98765 43210" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" id="s-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-field">
+        <label>Monthly Amount (₹)</label>
+        <input type="number" id="s-amount" placeholder="Select plan above or enter custom" oninput="updatePlanDisplay()" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Duration</label>
+        <select id="s-duration" onchange="updatePlanDisplay()">
+          <option value="12">12 months</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Payment Day (monthly)</label>
+        <select id="s-payday">
+          <option value="1">1st of every month</option>
+          <option value="5">5th of every month</option>
+          <option value="10">10th of every month</option>
+          <option value="15">15th of every month</option>
+          <option value="20">20th of every month</option>
+          <option value="25">25th of every month</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Nominee Name</label>
+        <input type="text" id="s-nominee" placeholder="Nominee full name" />
+      </div>
+      <div class="form-field">
+        <label>Nominee Relation</label>
+        <select id="s-relation">
+          <option>Spouse</option><option>Parent</option><option>Child</option>
+          <option>Sibling</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:20px">
+      <label>Referral Code (optional)</label>
+      <input type="text" id="s-referral" placeholder="Friend's referral code" />
+    </div>
+    <button class="btn-primary" onclick="joinScheme()">Join Saving Scheme →</button>
+    <p style="font-size:11px;color:var(--white-dim);text-align:center;margin-top:12px;opacity:.7">
+      🔒 Secure · Your savings are backed by physical gold · Regulated saving scheme
+    </p>
+  </div>
+
+  <!-- Benefits -->
+  <div class="benefits-section">
+    <div class="section-title" style="margin-bottom:16px">Why Saheehisab Gold Scheme?</div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">🎁</div>
+        <div class="benefit-title">12th Month FREE</div>
+        <div class="benefit-desc">Pay for 11 months, we contribute the 12th month equivalent. No other scheme does this.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💎</div>
+        <div class="benefit-title">50% Off Making</div>
+        <div class="benefit-desc">Redeem as jewellery at half the normal making charge — saves you thousands.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📅</div>
+        <div class="benefit-title">Birthday/Anniversary Alert</div>
+        <div class="benefit-desc">We remind you on special occasions to gift gold to your loved ones.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🔔</div>
+        <div class="benefit-title">Monthly Reminders</div>
+        <div class="benefit-desc">WhatsApp reminder on your chosen payment date. Never miss a month.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📊</div>
+        <div class="benefit-title">Live Tracking</div>
+        <div class="benefit-desc">Track your savings progress, gold grams accumulated, and current value live.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🏆</div>
+        <div class="benefit-title">Flexible Redemption</div>
+        <div class="benefit-desc">Redeem as any jewellery of your choice, gold coins, or transfer to digital gold wallet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Schemes -->
+  <div class="active-schemes">
+    <div class="section-title" style="margin-bottom:8px">Your Active Schemes</div>
+    <p class="section-sub">Enter your phone to view your scheme status</p>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <input type="tel" id="lookup-phone" placeholder="+91 phone number" style="flex:1;padding:11px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none" />
+      <button onclick="lookupSchemes()" style="padding:11px 20px;background:var(--gold);color:var(--black);border:none;border-radius:var(--r);font-weight:700;cursor:pointer">Look Up</button>
+    </div>
+    <div id="schemes-container">
+      <div class="empty-state">Enter your phone number to see your schemes</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var PLANS    = [500,1000,2000,5000,10000,20000];
+var selected = 2000;
+var goldRate = 9850;
+
+// Load gold rate
+fetch('/rates').then(function(r){return r.json();}).then(function(j){ if(j.success) goldRate=j.rates.gold_24k; renderPlans(); });
+
+function renderPlans() {
+  var grid = document.getElementById('plans-grid');
+  grid.innerHTML = PLANS.map(function(p) {
+    var grams12  = (p * 12) / goldRate;
+    var maturity = (p * 11 + p) * 1; // 12 months value
+    return '<div class="plan-card' + (p===2000?' popular':'') + (p===selected?' selected':'') + '" onclick="selectPlan(' + p + ')">' +
+      '<div class="plan-label">Monthly</div>' +
+      '<div class="plan-amount">₹' + p.toLocaleString('en-IN') + '</div>' +
+      '<div class="plan-grams">≈ ' + grams12.toFixed(3) + 'g in 12 months</div>' +
+      '<div class="plan-maturity">+1 month FREE from Saheehisab</div>' +
+      '</div>';
+  }).join('');
+}
+
+function selectPlan(amount) {
+  selected = amount;
+  document.getElementById('s-amount').value = amount;
+  renderPlans();
+  updatePlanDisplay();
+  document.getElementById('signup-card').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function updatePlanDisplay() {
+  var amount   = parseFloat(document.getElementById('s-amount').value) || selected;
+  var duration = parseInt(document.getElementById('s-duration').value) || 12;
+  var freeMonths = Math.floor(duration / 12); // 1 free per 12
+  var youPay   = amount * (duration - freeMonths);
+  var bonus    = amount * freeMonths;
+  var total    = youPay + bonus;
+  var grams    = total / goldRate;
+  var makingSave = (grams * goldRate * 0.22 * 0.10) * 0.50; // 50% of 10% making
+
+  document.getElementById('spd-amount').textContent   = '₹' + amount.toLocaleString('en-IN');
+  document.getElementById('spd-duration').textContent = duration + ' months';
+  document.getElementById('spd-you-pay').textContent  = '₹' + Math.round(youPay).toLocaleString('en-IN');
+  document.getElementById('spd-bonus').textContent    = '+₹' + Math.round(bonus).toLocaleString('en-IN');
+  document.getElementById('spd-total').textContent    = '₹' + Math.round(total).toLocaleString('en-IN');
+  document.getElementById('spd-making').textContent   = '~₹' + Math.round(makingSave).toLocaleString('en-IN') + ' saved';
+}
+
+function runCalculator() {
+  var amount   = parseFloat(document.getElementById('calc-amount').value) || 0;
+  var duration = parseInt(document.getElementById('calc-duration').value) || 12;
+  if (!amount) { document.getElementById('calc-result').style.display='none'; return; }
+
+  var freeMonths = Math.floor(duration / 12);
+  var youPay   = amount * (duration - freeMonths);
+  var bonus    = amount * freeMonths;
+  var total    = youPay + bonus;
+  var grams    = total / goldRate;
+  var makingSave = (grams * 9150 * 0.10) * 0.50;
+
+  document.getElementById('calc-result').style.display = 'block';
+  document.getElementById('cr-you-pay').textContent    = '₹' + Math.round(youPay).toLocaleString('en-IN');
+  document.getElementById('cr-bonus').textContent      = '+₹' + Math.round(bonus).toLocaleString('en-IN');
+  document.getElementById('cr-total').textContent      = '₹' + Math.round(total).toLocaleString('en-IN');
+  document.getElementById('cr-grams').textContent      = grams.toFixed(3) + 'g';
+  document.getElementById('cr-making-save').textContent= '~₹' + Math.round(makingSave).toLocaleString('en-IN');
+}
+
+async function joinScheme() {
+  var name     = document.getElementById('s-name').value.trim();
+  var phone    = document.getElementById('s-phone').value.trim();
+  var email    = document.getElementById('s-email').value.trim();
+  var amount   = parseFloat(document.getElementById('s-amount').value) || 0;
+  var duration = document.getElementById('s-duration').value;
+  var payday   = document.getElementById('s-payday').value;
+  var nominee  = document.getElementById('s-nominee').value.trim();
+  var relation = document.getElementById('s-relation').value;
+  var referral = document.getElementById('s-referral').value.trim();
+
+  if (!name || !phone || !amount) { alert('Name, phone, and monthly amount are required'); return; }
+  if (amount < 100) { alert('Minimum monthly amount is ₹100'); return; }
+
+  var res  = await fetch('/gold/scheme-join', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:name, phone:phone, email:email, monthly_amount:amount, duration_months:duration, payment_day:payday, nominee_name:nominee, nominee_relation:relation, referral_code:referral }) });
+  var json = await res.json();
+  if (json.success) {
+    alert('🎉 Welcome to Saheehisab Gold Saving Scheme!\n\nScheme ID: ' + json.scheme_id + '\n\nFirst payment due: ' + json.first_due + '\n\nWe will send you a WhatsApp confirmation shortly.');
+    document.getElementById('lookup-phone').value = phone;
+    lookupSchemes();
+    document.getElementById('schemes-container').scrollIntoView({ behavior:'smooth' });
+  } else { alert(json.error || 'Registration failed. Please try again.'); }
+}
+
+async function lookupSchemes() {
+  var phone = document.getElementById('lookup-phone').value.trim();
+  if (!phone) { alert('Enter your phone number'); return; }
+  var res  = await fetch('/gold/my-schemes?phone=' + encodeURIComponent(phone));
+  var json = await res.json();
+  var container = document.getElementById('schemes-container');
+
+  if (!json.success || !json.schemes.length) {
+    container.innerHTML = '<div class="empty-state">No schemes found for ' + phone + '. <a href="#signup-card" style="color:var(--gold)">Join a scheme →</a></div>';
+    return;
+  }
+
+  container.innerHTML = json.schemes.map(function(s) {
+    var paidMonths    = s.paid_months || 0;
+    var totalMonths   = parseInt(s.duration_months) || 12;
+    var pct           = Math.round((paidMonths / totalMonths) * 100);
+    var accumulatedGold = ((s.monthly_amount * paidMonths) / goldRate).toFixed(3);
+
+    var dotsHtml = '';
+    for (var i = 1; i <= totalMonths; i++) {
+      var cls, lbl;
+      if (i === totalMonths) { cls = 'free'; lbl = 'FREE'; }
+      else if (i <= paidMonths) { cls = 'paid'; lbl = i; }
+      else if (i === paidMonths + 1) { cls = 'due'; lbl = 'DUE'; }
+      else { cls = 'pending'; lbl = i; }
+      dotsHtml += '<div class="m-dot ' + cls + '" title="Month ' + i + (i===totalMonths?' (FREE from Saheehisab)':'') + '">' + lbl + '</div>';
+    }
+
+    return '<div class="scheme-card">' +
+      '<div class="scheme-header">' +
+        '<div class="scheme-info"><h4>Gold Saving Scheme · ' + s.duration_months + ' months</h4>' +
+        '<p>ID: ' + s.scheme_id + ' · Started: ' + new Date(s.start_date).toLocaleDateString('en-IN') + '</p></div>' +
+        '<div class="scheme-amount-badge"><span class="amt">₹' + Number(s.monthly_amount).toLocaleString('en-IN') + '</span><span class="lbl">per month</span></div>' +
+      '</div>' +
+      '<div class="progress-wrap"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="progress-labels"><span>' + paidMonths + ' months paid</span><span>' + (totalMonths - paidMonths) + ' remaining · ' + pct + '% complete</span></div>' +
+      '<div class="months-grid">' + dotsHtml + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px;font-size:12px">' +
+        '<div><div style="color:var(--white-dim)">Paid so far</div><div style="color:var(--gold);font-weight:600">₹' + Math.round(s.monthly_amount * paidMonths).toLocaleString('en-IN') + '</div></div>' +
+        '<div><div style="color:var(--white-dim)">Gold accumulated</div><div style="color:var(--gold);font-weight:600">' + accumulatedGold + 'g</div></div>' +
+        '<div><div style="color:var(--white-dim)">Maturity bonus</div><div style="color:var(--green);font-weight:600">₹' + Number(s.monthly_amount).toLocaleString('en-IN') + ' FREE</div></div>' +
+      '</div>' +
+      '<div class="scheme-actions">' +
+        '<button class="btn-sm btn-sm-gold" onclick="payInstalment(\'' + s.scheme_id + '\',' + s.monthly_amount + ')">Pay This Month ₹' + Number(s.monthly_amount).toLocaleString('en-IN') + '</button>' +
+        (paidMonths >= totalMonths - 1 ? '<button class="btn-sm btn-sm-green" onclick="redeemScheme(\'' + s.scheme_id + '\')">🎉 Redeem Now</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function payInstalment(schemeId, amount) {
+  if (!confirm('Pay ₹' + amount.toLocaleString('en-IN') + ' for this month?')) return;
+  var phone = document.getElementById('lookup-phone').value.trim();
+  var res   = await fetch('/gold/scheme-pay', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ scheme_id: schemeId, phone: phone, amount: amount }) });
+  var json  = await res.json();
+  if (json.success) { alert('✅ Payment recorded! Month ' + json.month_number + ' paid.'); lookupSchemes(); }
+  else { alert(json.error || 'Payment failed'); }
+}
+
+async function redeemScheme(schemeId) {
+  var phone = document.getElementById('lookup-phone').value.trim();
+  var type  = prompt('What would you like to redeem as?\n1. Jewellery (50% off making)\n2. Gold Coin\n3. Transfer to Digital Gold wallet\n\nEnter 1, 2, or 3:');
+  if (!type) return;
+  var types = { '1':'jewellery', '2':'coin', '3':'digital' };
+  var res   = await fetch('/gold/scheme-redeem', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ scheme_id: schemeId, phone: phone, redeem_as: types[type] || 'jewellery' }) });
+  var json  = await res.json();
+  if (json.success) alert('🎉 Redemption submitted! Our team will contact you within 24 hours.\n\nTotal value: ₹' + Math.round(json.total_value).toLocaleString('en-IN') + '\nBonus included: ₹' + Math.round(json.bonus_amount).toLocaleString('en-IN'));
+  else alert(json.error || 'Redemption failed');
+}
+
+renderPlans();
+updatePlanDisplay();
+</script>
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "PRDMQJJG17R4BN",
+    "name": "earrings kundan",
+    "jewellery_type": "earrings",
+    "metal": "Gold",
+    "purity": "22K",
+    "making_percent": 11.5,
+    "typical_weight_min": 0,
+    "typical_weight_max": 0,
+    "stones": "",
+    "description": "",
+    "images": [
+      "/catalogue-images/1781789468957-727239.png"
+    ],
+    "tags": [],
+    "active": true,
+    "created_at": "2026-06-18T13:31:08.968Z",
+    "updated_at": "2026-06-18T13:31:26.005Z"
+  }
+]

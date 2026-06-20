@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  var token    = localStorage.getItem('sh_token');
+  var customer = localStorage.getItem('sh_customer');
+  if (!token || !customer) {
+    // Not logged in — go to login (only once, no loop)
+    if (window.location.pathname !== '/login.html') {
+      window.location.replace('/login.html');
+    }
+  }
+})();
+</script>
+
+<meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Saheehisab AI – Know the true price of jewellery before you buy." />
+  <title>Saheehisab AI — Jewellery Price Transparency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-mark">◆</span> Saheehisab <em>AI</em></div>
+    <div class="nav-customer-links">
+      <a href="/catalogue.html" class="nav-customer-btn">📖 Catalogue</a>
+      <a href="/exchange.html" class="nav-customer-btn">♻️ Exchange</a>
+      <a href="/digital-gold.html" class="nav-customer-btn">🥇 Digital Gold</a>
+      <a href="/saving-scheme.html" class="nav-customer-btn">💰 Scheme</a>
+      <button class="nav-rates-btn" onclick="toggleRatesPanel()">⚙ Rates</button>
+                  <a href="/login.html?profile=1" class="nav-customer-btn" id="nav-account-btn" style="background:#1C1608;border-color:rgba(201,168,76,.4);color:var(--gold);font-weight:700">👤 My Account</a>
+    </div>
+  </div>
+</nav>
+
+<!-- RATES OVERLAY + PANEL -->
+<div class="rates-overlay hidden" id="rates-overlay" onclick="closeRatesPanel()"></div>
+<aside class="rates-panel hidden" id="rates-panel">
+  <div class="rates-panel-header">
+    <h2>⚙ Rates & Making Charges</h2>
+    <button class="rates-close" onclick="closeRatesPanel()">✕</button>
+  </div>
+  <div class="rates-body" id="rates-body">
+    <p class="rates-loading">Loading rates…</p>
+  </div>
+  <div class="rates-footer">
+    <button class="btn-save-rates" onclick="saveRates()">💾 Save</button>
+    <button class="btn-reset-rates" onclick="resetRates()">↩ Reset</button>
+  </div>
+</aside>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-eyebrow">Know before you buy</p>
+  <h1 class="hero-title">What is your jewellery<br /><em>actually</em> worth?</h1>
+  <p class="hero-sub">Paste any product link from Tanishq, CaratLane, Bluestone, Kalyan, Malabar, PNG — and see the true price in seconds.</p>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Tabs -->
+  <div class="tab-bar" role="tablist">
+    <button class="tab active" id="tab-url"     role="tab" aria-selected="true"  data-target="panel-url">🔗 Paste Product URL</button>
+    <button class="tab"        id="tab-image"   role="tab" aria-selected="false" data-target="panel-image">📷 Upload Photo</button>
+  </div>
+
+  <!-- ── PANEL 1: URL ── -->
+  <section class="panel active" id="panel-url" role="tabpanel">
+    <div class="input-group">
+      <input type="url" id="product-url" class="url-input" placeholder="https://www.tanishq.co.in/product/..." autocomplete="off" spellcheck="false" />
+      <button class="btn-analyse" id="btn-analyse-url" onclick="analyseUrl()">
+        <span class="btn-label">Analyse Price</span><span class="btn-icon">→</span>
+      </button>
+    </div>
+    <div class="supported-sites">
+      <span>Supported:</span> Tanishq · CaratLane · Bluestone · Kalyan · Malabar · PNG · and more
+    </div>
+  </section>
+
+  <!-- ── PANEL 2: JEWELLERY PHOTO + MANUAL INPUTS ── -->
+  <section class="panel" id="panel-image" role="tabpanel">
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">◆</div>
+      <p class="upload-title">Drop jewellery photo here</p>
+      <p class="upload-sub">or click to browse · JPG, PNG, WEBP up to 10 MB</p>
+      <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleFileSelect(event)" />
+    </div>
+    <div class="upload-preview hidden" id="upload-preview">
+      <img id="preview-img" src="" alt="Preview" />
+      <button class="btn-clear-img" onclick="clearImage()">✕ Remove</button>
+    </div>
+
+    <!-- Step 1 button: Identify from photo -->
+    <button class="btn-analyse mt-16" id="btn-identify-img" onclick="identifyFromImage()" disabled>
+      <span class="btn-label">Step 1 — Identify Jewellery</span><span class="btn-icon">→</span>
+    </button>
+
+    <!-- Manual input form — shown after AI identifies -->
+    <div class="manual-form hidden" id="manual-form">
+      <div class="manual-form-header">
+        <span class="manual-step-badge">Step 2</span>
+        <p>AI has identified the jewellery. Enter the exact weights from the product tag or bill for precise pricing.</p>
+      </div>
+
+      <div class="manual-grid">
+
+        <div class="manual-field">
+          <label>Jewellery Type</label>
+          <select id="mf-jewellery-type">
+            <option value="plain">Plain Jewellery</option>
+            <option value="ring">Ring</option>
+            <option value="necklace">Necklace</option>
+            <option value="chain">Chain</option>
+            <option value="pendant">Pendant</option>
+            <option value="earrings">Earrings</option>
+            <option value="bangle">Bangle</option>
+            <option value="bracelet">Bracelet</option>
+            <option value="jhumka">Jhumka</option>
+            <option value="anklet">Anklet</option>
+            <option value="temple">Temple Jewellery</option>
+            <option value="kundan">Kundan</option>
+          </select>
+        </div>
+
+        <div class="manual-field">
+          <label>Metal Purity</label>
+          <select id="mf-purity">
+            <option value="22K">22 Karat</option>
+            <option value="18K">18 Karat</option>
+            <option value="24K">24 Karat</option>
+            <option value="14K">14 Karat</option>
+            <option value="Silver">Silver</option>
+            <option value="Platinum">Platinum</option>
+          </select>
+        </div>
+
+        <div class="manual-field">
+          <label>Gold Weight (grams)</label>
+          <input type="number" id="mf-gold-weight" placeholder="e.g. 8.5" min="0" step="0.01" />
+        </div>
+
+        <div class="manual-field">
+          <label>Store's Quoted Price (₹)</label>
+          <input type="number" id="mf-website-price" placeholder="Price store quoted you" min="0" step="1" />
+        </div>
+
+      </div>
+
+      <!-- Dynamic stone rows -->
+      <div class="stone-inputs-header">
+        <span>Stones (enter from product tag)</span>
+        <button class="btn-add-stone" onclick="addStoneRow()">+ Add Stone</button>
+      </div>
+      <div id="stone-rows">
+        <!-- Stone rows injected here -->
+      </div>
+
+      <button class="btn-analyse mt-20" id="btn-calc-manual" onclick="calculateManual()">
+        <span class="btn-label">Calculate Price</span><span class="btn-icon">→</span>
+      </button>
+    </div>
+
+  </section>
+
+
+
+  <!-- Loader -->
+  <div class="loader hidden" id="loader">
+    <div class="spinner"></div>
+    <p class="loader-text" id="loader-text">Fetching product details…</p>
+    <p class="loader-sub">This usually takes 10–20 seconds</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box hidden" id="error-box">
+    <span class="error-icon">⚠</span>
+    <p id="error-msg">Something went wrong.</p>
+  </div>
+
+  <!-- Result -->
+  <div class="result hidden" id="result">
+
+    <div class="product-header">
+      <div class="product-img-wrap">
+        <img id="result-img" src="" alt="Product" class="product-img" />
+      </div>
+      <div class="product-meta">
+        <p class="product-tag" id="result-jewellery-type"></p>
+        <h2 class="product-name" id="result-name"></h2>
+        <div class="product-chips">
+          <span class="chip" id="chip-metal"></span>
+          <span class="chip" id="chip-purity"></span>
+          <span class="chip" id="chip-weight"></span>
+          <span class="chip chip--making" id="chip-making"></span>
+        </div>
+        <p class="ai-note hidden" id="ai-note"></p>
+
+        <!-- Weight input when not found -->
+        <div class="weight-input-box hidden" id="weight-input-box">
+          <p class="weight-input-label">📋 One step needed — enter the gold weight from the product page</p>
+          <p style="font-size:12px;color:#A89F8C;margin-bottom:12px">
+            On CaratLane / Bhima / this site — scroll to <strong style="color:#F5F0E8">Specifications</strong> or <strong style="color:#F5F0E8">Product Details</strong> tab and look for <strong style="color:#C9A84C">"Net Weight"</strong> or <strong style="color:#C9A84C">"Gold Weight"</strong>
+          </p>
+          <div class="weight-input-row">
+            <input type="number" id="manual-weight-input" placeholder="e.g. 2.4" min="0.01" step="0.01"
+              onkeydown="if(event.key==='Enter') recalculateWithWeight()" />
+            <span class="weight-unit">grams</span>
+            <button class="btn-recalculate" onclick="recalculateWithWeight()">Get Our Price →</button>
+          </div>
+          <p style="font-size:11px;color:#8B6914;margin-top:8px;line-height:1.5">
+            Store price (₹35,508) is already captured. Just add the weight and we'll show you the full comparison instantly.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="stone-section hidden" id="stone-section">
+      <h3 class="section-title">Stone Details</h3>
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Stone Type</th>
+              <th>Weight</th>
+              <th>Website Rate</th>
+              <th>Our Rate</th>
+              <th>Website Value</th>
+              <th class="saheehisab-col">Our Value</th>
+            </tr>
+          </thead>
+          <tbody id="stone-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="compare-section">
+      <h3 class="section-title">Price Breakdown</h3>
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Store's Price</th>
+              <th class="saheehisab-col">Saheehisab Price</th>
+            </tr>
+          </thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="savings-card" id="savings-card">
+      <p class="savings-label">Estimated Savings with Saheehisab</p>
+      <p class="savings-amount" id="savings-amount">₹0</p>
+      <p class="savings-sub" id="savings-sub"></p>
+    </div>
+
+    <!-- Enquiry Form -->
+    <div class="enquiry-card" id="enquiry-card">
+      <div class="enquiry-header">
+        <div>
+          <p class="enquiry-title">💎 Interested? Get a Quote from Saheehisab</p>
+          <p class="enquiry-sub">Leave your details and we'll contact you with the best price.</p>
+        </div>
+        <button class="enquiry-toggle" onclick="toggleEnquiry()" id="enquiry-toggle-btn">+ Open Form</button>
+      </div>
+      <div class="enquiry-form hidden" id="enquiry-form">
+        <div class="enquiry-grid">
+          <div class="eq-field">
+            <label>Your Name *</label>
+            <input type="text" id="eq-name" placeholder="Enter your name" />
+          </div>
+          <div class="eq-field">
+            <label>Phone Number *</label>
+            <input type="tel" id="eq-phone" placeholder="+91 98765 43210" />
+          </div>
+          <div class="eq-field">
+            <label>Email (optional)</label>
+            <input type="email" id="eq-email" placeholder="you@example.com" />
+          </div>
+          <div class="eq-field eq-full">
+            <label>Message (optional)</label>
+            <textarea id="eq-message" placeholder="Any specific requirements or questions…" rows="2"></textarea>
+          </div>
+        </div>
+        <button class="btn-enquiry-submit" id="btn-eq-submit" onclick="submitEnquiry()">
+          Send Enquiry →
+        </button>
+        <p class="enquiry-privacy">🔒 Your details are private and will only be used to contact you about this product.</p>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="action-btn" onclick="shareWhatsApp()"><span>💬</span> Share Result</button>
+      <button class="action-btn btn-make-this" onclick="makeThisProduct()">
+        <span>🛕</span> Make This for Me
+      </button>
+      <button class="action-btn" onclick="shareNative()"><span>🔗</span> Share</button>
+      <button class="action-btn" onclick="printReport()"><span>🖨️</span> Print</button>
+      <button class="action-btn action-btn--outline" onclick="resetApp()">↩ New Analysis</button>
+    </div>
+
+  </div>
+
+  <!-- OUR SERVICES SECTION -->
+  <div class="services-section">
+    <div class="services-header">
+      <p class="services-eyebrow">Everything We Offer</p>
+      <h2 class="services-title">More Ways We Help You</h2>
+      <p class="services-sub">Saheehisab is your complete jewellery companion — from price transparency to digital gold savings</p>
+    </div>
+    <div class="feature-banner feature-banner--grid">
+      <a href="/digital-gold.html" class="fb-card">
+        <div class="fb-icon">🥇</div>
+        <div class="fb-content">
+          <div class="fb-title">Digital Gold</div>
+          <div class="fb-desc">Buy 24K gold from ₹1 · Sell anytime · Redeem as jewellery with 50% off making</div>
+        </div>
+        <div class="fb-arrow">→</div>
+      </a>
+      <a href="/saving-scheme.html" class="fb-card">
+        <div class="fb-icon">💰</div>
+        <div class="fb-content">
+          <div class="fb-title">Gold Saving Scheme</div>
+          <div class="fb-desc">Pay 11 months · Get 12th FREE · 50% off making charges at maturity</div>
+        </div>
+        <div class="fb-arrow">→</div>
+      </a>
+      <a href="/exchange.html" class="fb-card">
+        <div class="fb-icon">♻️</div>
+        <div class="fb-content">
+          <div class="fb-title">Old Gold Exchange</div>
+          <div class="fb-desc">Is the store's exchange offer fair? Check in 10 seconds</div>
+        </div>
+        <div class="fb-arrow">→</div>
+      </a>
+      <a href="/catalogue.html" class="fb-card">
+        <div class="fb-icon">📖</div>
+        <div class="fb-content">
+          <div class="fb-title">Jewellery Catalogue</div>
+          <div class="fb-desc">At a store? Find similar jewellery · Fill details · Get our best price instantly</div>
+        </div>
+        <div class="fb-arrow">→</div>
+      </a>
+      <div class="fb-card fb-card--static">
+        <div class="fb-icon">💎</div>
+        <div class="fb-content">
+          <div class="fb-title">50% Off Making Charges</div>
+          <div class="fb-desc">Exclusive benefit for Digital Gold &amp; Saving Scheme members</div>
+        </div>
+        <div class="fb-badge">MEMBER BENEFIT</div>
+      </div>
+      <div class="fb-card fb-card--static">
+        <div class="fb-icon">📞</div>
+        <div class="fb-content">
+          <div class="fb-title">Talk to Us</div>
+          <div class="fb-desc">WhatsApp: +91 95094 58270 · Mon–Sat 10am–7pm</div>
+        </div>
+        <div class="fb-badge" style="background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.3);color:#4CAF7D">LIVE SUPPORT</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+
+
+<script>
+// Show customer name in nav
+(function() {
+  try {
+    var c = JSON.parse(localStorage.getItem('sh_customer') || 'null');
+    if (c && c.name) {
+      var btn = document.getElementById('nav-account-btn');
+      if (btn) btn.textContent = '👤 ' + c.name.split(' ')[0];
+    }
+  } catch(e) {}
+})();
+</script>
+<script src="app.js"></script>
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

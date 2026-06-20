@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Saheehisab — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#060608;--bg2:#0e0e12;--bg3:#16161c;--bg4:#1e1e26;--gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#7a5c1e;--gold-bg:#130f04;--white:#F0EBE0;--dim:#8a8070;--faint:#333;--green:#3d9e6a;--red:#c04040;--blue:#4a7ab5;--purple:#7a4ab5;--orange:#c07840;--r:8px;--r2:12px;--sidebar:230px;--font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--white);font-family:var(--font-b);font-size:13px;display:flex;height:100vh;overflow:hidden}
+
+/* LOGIN GATE */
+#login-gate{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center}
+.login-box{width:380px;background:var(--bg2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:36px}
+.login-logo{font-family:var(--font-d);font-size:28px;color:var(--white);text-align:center;margin-bottom:4px}
+.login-logo em{color:var(--gold);font-style:italic}
+.login-sub{text-align:center;font-size:11px;color:var(--dim);margin-bottom:28px;letter-spacing:.05em}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:5px}
+.login-field input{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:13px;outline:none;transition:.15s}
+.login-field input:focus{border-color:var(--gold)}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#000;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;transition:.2s}
+.login-btn:hover{opacity:.9}
+.login-error{background:rgba(192,64,64,.1);border:1px solid rgba(192,64,64,.3);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--red);margin-top:10px;display:none}
+.login-attempts{font-size:11px;color:var(--dim);text-align:center;margin-top:10px}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:var(--sidebar);right:0;height:52px;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.08);display:flex;align-items:center;padding:0 24px;gap:16px;z-index:40}
+.topbar::before{content:'';position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold) 40%,var(--gold-l) 60%,transparent)}
+.page-title{font-family:var(--font-d);font-size:20px;color:var(--white);flex:1}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(61,158,106,.1);border:1px solid rgba(61,158,106,.25);border-radius:100px;padding:4px 12px;font-size:11px;color:var(--green)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.topbar-time{font-size:11px;color:var(--dim)}
+.topbar-actions{display:flex;gap:8px}
+.tbtn{padding:6px 13px;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(201,168,76,.2);background:transparent;color:var(--dim);font-family:var(--font-b);transition:.15s}
+.tbtn:hover{color:var(--gold);border-color:var(--gold)}
+.tbtn-red{border-color:rgba(192,64,64,.25);color:var(--red)}.tbtn-red:hover{background:rgba(192,64,64,.1)}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid rgba(201,168,76,.08);height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:50}
+.sidebar-brand{padding:16px 18px 14px;border-bottom:1px solid rgba(201,168,76,.08)}
+.brand-name{font-family:var(--font-d);font-size:19px;color:var(--white)}.brand-name em{color:var(--gold);font-style:italic}
+.brand-sub{font-size:9px;color:var(--gold-dim);letter-spacing:.1em;margin-top:2px}
+.nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav::-webkit-scrollbar{width:3px}.nav::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15);border-radius:3px}
+.nav-group{font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:12px 18px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;transition:.12s;border-left:2px solid transparent;color:var(--dim);font-size:12px;font-weight:500;text-decoration:none;user-select:none}
+.nav-item:hover{color:var(--white);background:rgba(201,168,76,.04);border-left-color:rgba(201,168,76,.2)}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.07)}
+.nav-icon{font-size:14px;width:17px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--gold);color:#000;font-size:8px;font-weight:800;padding:2px 5px;border-radius:100px;min-width:18px;text-align:center}
+.nav-badge.green{background:var(--green)}
+.sidebar-foot{padding:12px;border-top:1px solid rgba(201,168,76,.08)}
+.nav-logout{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(192,64,64,.08);border:1px solid rgba(192,64,64,.18);border-radius:var(--r);color:var(--red);font-size:12px;cursor:pointer;width:100%;font-family:var(--font-b);transition:.15s}
+.nav-logout:hover{background:rgba(192,64,64,.15)}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);padding-top:52px;height:100vh;overflow-y:auto;flex:1}
+.main::-webkit-scrollbar{width:4px}.main::-webkit-scrollbar-thumb{background:rgba(201,168,76,.12);border-radius:4px}
+.content{padding:20px 24px 48px}
+
+/* PAGES */
+.pg{display:none}.pg.on{display:block}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--bg2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r2);padding:14px 16px;position:relative;overflow:hidden;transition:.2s;cursor:default}
+.stat:hover{border-color:rgba(201,168,76,.28)}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat.gold::after{background:linear-gradient(90deg,var(--gold),var(--gold-l))}
+.stat.green::after{background:linear-gradient(90deg,#2d7a50,#3d9e6a)}
+.stat.blue::after{background:linear-gradient(90deg,#2a4a80,#4a7ab5)}
+.stat.purple::after{background:linear-gradient(90deg,#4a2a80,#7a4ab5)}
+.stat.orange::after{background:linear-gradient(90deg,#804a20,var(--orange))}
+.stat.red::after{background:linear-gradient(90deg,#802020,var(--red))}
+.stat-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.stat-val{font-family:var(--font-d);font-size:26px;font-weight:600;line-height:1}
+.stat.gold .stat-val{color:var(--gold)}
+.stat.green .stat-val{color:var(--green)}
+.stat.blue .stat-val{color:var(--blue)}
+.stat.purple .stat-val{color:var(--purple)}
+.stat.orange .stat-val{color:var(--orange)}
+.stat.red .stat-val{color:var(--red)}
+.stat-sub{font-size:10px;color:var(--dim);margin-top:4px}
+
+/* CARDS & TABLES */
+.card{background:var(--bg2);border:1px solid rgba(201,168,76,.08);border-radius:var(--r2);overflow:hidden;margin-bottom:16px}
+.card-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.07)}
+.card-title{font-size:13px;font-weight:600;color:var(--white)}
+.card-sub{font-size:11px;color:var(--dim)}
+.card-acts{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg3)}
+th{padding:9px 13px;text-align:left;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid rgba(201,168,76,.07);white-space:nowrap}
+td{padding:9px 13px;font-size:12px;color:var(--white);border-bottom:1px solid rgba(255,255,255,.025);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(201,168,76,.025);cursor:pointer}
+.empty{text-align:center;padding:36px;color:var(--dim);font-size:12px}
+
+/* TAGS */
+.tag{display:inline-block;padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;white-space:nowrap}
+.tg{background:rgba(201,168,76,.12);color:var(--gold)}
+.tgn{background:rgba(61,158,106,.12);color:var(--green)}
+.trd{background:rgba(192,64,64,.12);color:var(--red)}
+.tbl{background:rgba(74,122,181,.12);color:var(--blue)}
+.tpu{background:rgba(122,74,181,.12);color:var(--purple)}
+.tor{background:rgba(192,120,64,.12);color:var(--orange)}
+.tdm{background:rgba(255,255,255,.06);color:var(--dim)}
+
+/* BUTTONS */
+.btn{padding:6px 13px;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-b);transition:.15s;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.btn-g{background:var(--gold);color:#000}.btn-g:hover{background:var(--gold-l)}
+.btn-o{background:transparent;border:1px solid rgba(201,168,76,.22);color:var(--gold)}.btn-o:hover{background:rgba(201,168,76,.1)}
+.btn-gn{background:#1a3325;border:1px solid rgba(61,158,106,.25);color:var(--green)}.btn-gn:hover{background:rgba(61,158,106,.12)}
+.btn-rd{background:rgba(192,64,64,.08);border:1px solid rgba(192,64,64,.22);color:var(--red)}.btn-rd:hover{background:rgba(192,64,64,.18)}
+.btn-bl{background:rgba(74,122,181,.1);border:1px solid rgba(74,122,181,.25);color:var(--blue)}.btn-bl:hover{background:rgba(74,122,181,.18)}
+
+/* INPUTS */
+.inp{padding:7px 11px;background:var(--bg3);border:1px solid rgba(201,168,76,.14);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:12px;outline:none;transition:.15s}
+.inp:focus{border-color:var(--gold)}
+.inp-sm{padding:5px 9px;font-size:11px}
+select.inp option{background:var(--bg3)}
+.an-tab:hover{color:var(--white) !important;background:rgba(201,168,76,.04) !important}
+.an-tab.on{color:var(--gold) !important;background:rgba(201,168,76,.08) !important}
+
+/* FILTER PILLS */
+.pills{display:flex;gap:6px;padding:8px 14px;flex-wrap:wrap}
+.pill{padding:4px 11px;border-radius:100px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid rgba(201,168,76,.13);background:transparent;color:var(--dim);transition:.12s;font-family:var(--font-b)}
+.pill:hover{color:var(--white);border-color:rgba(201,168,76,.35)}
+.pill.on{background:var(--gold-bg);border-color:var(--gold);color:var(--gold)}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.chart-card{background:var(--bg2);border:1px solid rgba(201,168,76,.08);border-radius:var(--r2);padding:14px}
+.chart-title{font-size:11px;font-weight:600;color:var(--white);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em}
+.bar-rows{display:flex;flex-direction:column;gap:7px}
+.bar-row{display:flex;align-items:center;gap:9px}
+.bar-lbl{width:90px;font-size:11px;color:var(--dim);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;background:var(--bg4);border-radius:4px;height:5px;overflow:hidden}
+.bar-fill{height:5px;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-l));transition:.6s ease}
+.bar-val{width:50px;text-align:right;font-size:11px;color:var(--white);font-weight:500}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;backdrop-filter:blur(8px)}
+.modal-bg.on{display:flex}
+.modal{background:var(--bg2);border:1px solid rgba(201,168,76,.18);border-radius:14px;padding:24px;width:100%;max-width:580px;margin:auto}
+.modal h3{font-family:var(--font-d);font-size:20px;color:var(--white);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.mclose{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer}.mclose:hover{color:var(--red)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff.full{grid-column:1/-1}
+.ff label{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim)}
+.macts{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+
+/* CUSTOMER PROFILE POPUP */
+.cust-hero{display:flex;align-items:center;gap:14px;padding:14px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.18);border-radius:var(--r2);margin-bottom:14px}
+.cust-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-l));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:22px;font-weight:600;color:#000;flex-shrink:0}
+.cust-name{font-family:var(--font-d);font-size:20px;color:var(--white)}
+.cust-ph{font-size:11px;color:var(--dim);margin-top:2px}
+.cust-since{font-size:9px;color:var(--gold-dim);margin-top:2px}
+.mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.mini-stat{background:var(--bg3);border-radius:var(--r);padding:10px;text-align:center}
+.ms-val{font-family:var(--font-d);font-size:18px;color:var(--gold)}
+.ms-lbl{font-size:9px;color:var(--dim);margin-top:2px}
+.analysis-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.analysis-item:last-child{border-bottom:none}
+.analysis-img{width:38px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.analysis-img-ph{width:38px;height:38px;background:var(--bg4);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.analysis-info{flex:1;min-width:0}
+.analysis-name{font-size:12px;color:var(--white);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.analysis-meta{font-size:10px;color:var(--dim);margin-top:2px}
+.section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid rgba(201,168,76,.1)}
+
+/* WHATSAPP COMPOSER */
+.wa-preview{background:var(--bg3);border:1px solid rgba(61,158,106,.2);border-radius:var(--r);padding:12px;font-size:12px;color:var(--white);white-space:pre-wrap;max-height:280px;overflow-y:auto;margin-bottom:10px;font-family:monospace;line-height:1.6}
+.wa-actions{display:flex;gap:8px}
+
+/* SECURITY LOG */
+.sec-event{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.sec-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.sec-dot.ok{background:var(--green)}.sec-dot.warn{background:var(--orange)}.sec-dot.bad{background:var(--red)}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#000;padding:10px 20px;border-radius:100px;font-size:12px;font-weight:700;z-index:9999;opacity:0;transform:translateY(10px);transition:.3s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){:root{--sidebar:0px}.sidebar{display:none}.main{margin-left:0}.topbar{left:0}}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN GATE ──────────────────────────────────────────────────────── -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-logo">◆ Saheehisab <em>AI</em></div>
+    <div class="login-sub">ADMIN COMMAND CENTRE · RESTRICTED ACCESS</div>
+    <div class="login-field">
+      <label>Admin Password</label>
+      <input type="password" id="lg-pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Authenticate →</button>
+    <div class="login-error" id="lg-err">Incorrect password. Access denied.</div>
+    <div class="login-attempts" id="lg-attempts"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="emergencyReset()" style="background:none;border:none;color:var(--dim);font-size:10px;cursor:pointer;text-decoration:underline;font-family:var(--font-b)">Reset lockout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIDEBAR ────────────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">◆ Saheehisab <em>AI</em></div>
+    <div class="brand-sub">ADMIN COMMAND CENTRE</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group">Overview</div>
+    <div class="nav-item active" onclick="go('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+
+    <div class="nav-group">Intelligence</div>
+    <div class="nav-item" onclick="go('analytics')"><span class="nav-icon">🔍</span>Analytics<span class="nav-badge" id="nb-leads">0</span></div>
+    <div class="nav-item" onclick="go('insights')"><span class="nav-icon">💡</span>Insights</div>
+
+    <div class="nav-group">Customers</div>
+    <div class="nav-item" onclick="go('customers')"><span class="nav-icon">👥</span>All Customers<span class="nav-badge" id="nb-custs">0</span></div>
+    <div class="nav-item" onclick="go('customer-view')" id="nav-custview" style="display:none"><span class="nav-icon">👤</span>Customer Profile</div>
+
+    <div class="nav-group">Products</div>
+    <div class="nav-item" onclick="go('gold')"><span class="nav-icon">🥇</span>Digital Gold</div>
+    <div class="nav-item" onclick="go('schemes')"><span class="nav-icon">💰</span>Saving Schemes</div>
+    <div class="nav-item" onclick="go('catalogue')"><span class="nav-icon">📖</span>Catalogue</div>
+
+    <div class="nav-group">Operations</div>
+    <div class="nav-item" onclick="go('rates')"><span class="nav-icon">📈</span>Gold Rates</div>
+    <div class="nav-item" onclick="go('security')"><span class="nav-icon">🔒</span>Security</div>
+    <div class="nav-item" onclick="go('wa-blast')"><span class="nav-icon">💬</span>WhatsApp Blast</div>
+    <div class="nav-item" onclick="go('exports')"><span class="nav-icon">⬇</span>Export Data</div>
+  </nav>
+  <div class="sidebar-foot">
+    <a href="/" class="nav-item" style="border-left:none;margin-bottom:6px">🏠 Back to App</a>
+    <button class="nav-logout" onclick="adminLogout()">🔒 Sign Out</button>
+  </div>
+</aside>
+
+<!-- ── TOP BAR ────────────────────────────────────────────────────────── -->
+<div class="topbar" id="topbar" style="display:none">
+  <div class="page-title" id="page-title">Dashboard</div>
+  <div class="topbar-actions">
+    <button class="tbtn" onclick="loadAll()">↻ Refresh</button>
+    <button class="tbtn tbtn-red" onclick="adminLogout()">Sign Out</button>
+  </div>
+  <div class="live-pill"><span class="live-dot"></span>Live</div>
+  <div class="topbar-time" id="clock"></div>
+</div>
+
+<!-- ── MAIN ───────────────────────────────────────────────────────────── -->
+<div class="main" id="main" style="display:none">
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="pg on" id="pg-dashboard">
+  <div class="stat-row" id="ds-stats"></div>
+  <div class="chart-grid" id="ds-charts"></div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Latest Activity</span><span class="card-sub" id="ds-activity-time"></span></div>
+    <table><thead><tr><th>Time</th><th>Customer</th><th>Product</th><th>Category</th><th>Store Price</th><th>Our Price</th><th>Savings</th><th>Type</th></tr></thead>
+    <tbody id="ds-recent"></tbody></table>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="pg" id="pg-analytics">
+  <div class="stat-row" id="an-stats"></div>
+
+  <!-- TAB BAR -->
+  <div style="display:flex;gap:0;background:var(--bg2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r2);overflow:hidden;margin-bottom:16px">
+    <button class="an-tab on" onclick="switchAnTab('url',this)" style="flex:1;padding:10px 6px;border:none;background:transparent;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(201,168,76,.1);font-family:var(--font-b);letter-spacing:.05em;transition:.15s">🔗 URL Analyses</button>
+    <button class="an-tab" onclick="switchAnTab('image',this)" style="flex:1;padding:10px 6px;border:none;background:transparent;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(201,168,76,.1);font-family:var(--font-b);letter-spacing:.05em;transition:.15s">📷 Image/Invoice</button>
+    <button class="an-tab" onclick="switchAnTab('exchange',this)" style="flex:1;padding:10px 6px;border:none;background:transparent;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(201,168,76,.1);font-family:var(--font-b);letter-spacing:.05em;transition:.15s">♻ Exchange</button>
+    <button class="an-tab" onclick="switchAnTab('gold',this)" style="flex:1;padding:10px 6px;border:none;background:transparent;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;border-right:1px solid rgba(201,168,76,.1);font-family:var(--font-b);letter-spacing:.05em;transition:.15s">🥇 Gold Txns</button>
+    <button class="an-tab" onclick="switchAnTab('signups',this)" style="flex:1;padding:10px 6px;border:none;background:transparent;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-b);letter-spacing:.05em;transition:.15s">👤 Signups</button>
+  </div>
+
+  <!-- URL ANALYSES -->
+  <div id="an-tab-url">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Price Comparison Analyses (URL)</span>
+        <div class="card-acts">
+          <input class="inp inp-sm" placeholder="Search product, store…" oninput="filterLeadsTab(this.value,'url')" style="width:200px"/>
+          <a href="/export/leads/excel" class="btn btn-gn">📊 Excel</a>
+          <button class="btn btn-o" onclick="exportLeadsCSV()">📄 CSV</button>
+        </div>
+      </div>
+      <table><thead><tr><th>Time</th><th>Customer</th><th>Product</th><th>Category</th><th>Weight</th><th>Purity</th><th>Store Price</th><th>Our Price</th><th>Savings</th><th>Store</th></tr></thead>
+      <tbody id="an-url-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- IMAGE / INVOICE -->
+  <div id="an-tab-image" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Image & Invoice Uploads</span>
+        <input class="inp inp-sm" placeholder="Search…" oninput="filterLeadsTab(this.value,'image')" style="width:200px"/>
+      </div>
+      <table><thead><tr><th>Time</th><th>Type</th><th>Customer</th><th>Product</th><th>Category</th><th>Weight</th><th>Store Price</th><th>Our Price</th><th>Savings</th></tr></thead>
+      <tbody id="an-image-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- EXCHANGE CALC -->
+  <div id="an-tab-exchange" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Old Gold Exchange Calculations</span>
+        <input class="inp inp-sm" placeholder="Search…" oninput="filterLeadsTab(this.value,'exchange')" style="width:200px"/>
+      </div>
+      <table><thead><tr><th>Time</th><th>Customer</th><th>Weight</th><th>Purity</th><th>Exchange Value</th><th>Notes</th></tr></thead>
+      <tbody id="an-exchange-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- GOLD TRANSACTIONS -->
+  <div id="an-tab-gold" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Digital Gold Transactions</span>
+        <input class="inp inp-sm" placeholder="Search…" oninput="filterLeadsTab(this.value,'gold')" style="width:200px"/>
+      </div>
+      <table><thead><tr><th>Time</th><th>Customer</th><th>Type</th><th>Grams</th><th>Amount</th></tr></thead>
+      <tbody id="an-gold-body"></tbody></table>
+    </div>
+  </div>
+
+  <!-- SIGNUPS & ENQUIRIES -->
+  <div id="an-tab-signups" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Customer Signups & Enquiries</span>
+        <input class="inp inp-sm" placeholder="Search…" oninput="filterLeadsTab(this.value,'signups')" style="width:200px"/>
+      </div>
+      <table><thead><tr><th>Time</th><th>Type</th><th>Name</th><th>Phone</th><th>Email</th><th>City</th><th>Message</th></tr></thead>
+      <tbody id="an-signups-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="pg" id="pg-insights">
+  <div class="chart-grid">
+    <div class="chart-card"><div class="chart-title">Top Jewellery Categories</div><div class="bar-rows" id="ins-cats"></div></div>
+    <div class="chart-card"><div class="chart-title">Top Stores Analysed</div><div class="bar-rows" id="ins-stores"></div></div>
+    <div class="chart-card"><div class="chart-title">Purity Distribution</div><div class="bar-rows" id="ins-purity"></div></div>
+    <div class="chart-card"><div class="chart-title">Daily Activity (14 days)</div><div class="bar-rows" id="ins-daily"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Most Searched Products</span></div>
+    <table><thead><tr><th>Product</th><th>Times Searched</th><th>Avg Savings</th><th>Avg Store Price</th><th>Category</th></tr></thead>
+    <tbody id="ins-products"></tbody></table>
+  </div>
+</div>
+
+<!-- CUSTOMERS -->
+<div class="pg" id="pg-customers">
+  <div class="pills" id="cust-pills">
+    <button class="pill on" onclick="setCustFilter('all',this)">All</button>
+    <button class="pill" onclick="setCustFilter('active',this)">Active (7d)</button>
+    <button class="pill" onclick="setCustFilter('gold',this)">Has Gold</button>
+    <button class="pill" onclick="setCustFilter('scheme',this)">Has Scheme</button>
+    <button class="pill" onclick="setCustFilter('new',this)">New (30d)</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Customer Profiles</span>
+      <div class="card-acts">
+        <input class="inp inp-sm" placeholder="Name, phone, email…" oninput="filterCustomers(this.value)" style="width:200px"/>
+        <a href="/export/customers/excel" class="btn btn-gn">📊 Excel</a>
+        <button class="btn btn-o" onclick="exportCustCSV()">📄 CSV</button>
+      </div>
+    </div>
+    <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>City</th><th>Analyses</th><th>Fav Category</th><th>Savings</th><th>Gold</th><th>Last Login</th><th>Actions</th></tr></thead>
+    <tbody id="cust-body"></tbody></table>
+  </div>
+</div>
+
+<!-- CUSTOMER VIEW -->
+<div class="pg" id="pg-customer-view">
+  <div id="cv-content"></div>
+</div>
+
+<!-- DIGITAL GOLD -->
+<div class="pg" id="pg-gold">
+  <div class="stat-row" id="gl-stats"></div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Digital Gold Accounts</span>
+      <div class="card-acts">
+        <input class="inp inp-sm" placeholder="Search…" oninput="filterGold(this.value)" style="width:160px"/>
+        <button class="btn btn-g" onclick="openGoldModal()">+ Transaction</button>
+      </div>
+    </div>
+    <table><thead><tr><th>#</th><th>Customer</th><th>Phone</th><th>Gold Balance</th><th>Invested</th><th>Portfolio Value</th><th>P&L</th><th>Last Txn</th><th>Actions</th></tr></thead>
+    <tbody id="gl-body"></tbody></table>
+  </div>
+</div>
+
+<!-- SAVING SCHEMES -->
+<div class="pg" id="pg-schemes">
+  <div class="stat-row" id="sc-stats"></div>
+  <div class="pills">
+    <button class="pill on" onclick="setSchemeFilter('all',this)">All</button>
+    <button class="pill" onclick="setSchemeFilter('active',this)">Active</button>
+    <button class="pill" onclick="setSchemeFilter('matured',this)">Matured</button>
+    <button class="pill" onclick="setSchemeFilter('redeemed',this)">Redeemed</button>
+    <button class="pill" onclick="setSchemeFilter('due',this)">Payment Due</button>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">All Saving Schemes</span>
+      <input class="inp inp-sm" placeholder="Search…" oninput="filterSchemes(this.value)" style="width:160px"/>
+    </div>
+    <table><thead><tr><th>#</th><th>Scheme ID</th><th>Customer</th><th>Monthly</th><th>Paid</th><th>Total Paid</th><th>Bonus</th><th>Status</th><th>Started</th><th>Progress</th><th>Actions</th></tr></thead>
+    <tbody id="sc-body"></tbody></table>
+  </div>
+</div>
+
+<!-- CATALOGUE -->
+<div class="pg" id="pg-catalogue">
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Jewellery Catalogue</span>
+      <a href="/catalogue-admin.html" class="btn btn-g">Manage Catalogue ↗</a>
+    </div>
+    <table><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Weight</th><th>Purity</th><th>Price</th><th>Stock</th></tr></thead>
+    <tbody id="cat-body"></tbody></table>
+  </div>
+</div>
+
+<!-- RATES -->
+<div class="pg" id="pg-rates">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-head"><span class="card-title">🥇 Gold Rates (per gram)</span></div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px" id="rates-gold"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">💎 Stone & Other Rates</span></div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px" id="rates-other"></div>
+    </div>
+  </div>
+  <div class="card" style="max-width:400px">
+    <div class="card-head"><span class="card-title">⚙ Making Charges (%)</span></div>
+    <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px" id="rates-making"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:6px">
+    <button class="btn btn-g" onclick="saveRates()" style="padding:11px 28px">Save All Rates</button>
+    <button class="btn btn-o" onclick="resetRates()">Reset to Default</button>
+  </div>
+</div>
+
+<!-- SECURITY -->
+<div class="pg" id="pg-security">
+  <div class="stat-row">
+    <div class="stat green"><div class="stat-lbl">Login Attempts</div><div class="stat-val" id="sec-attempts">0</div><div class="stat-sub">All time</div></div>
+    <div class="stat red"><div class="stat-lbl">Blocked Attempts</div><div class="stat-val" id="sec-blocked">0</div><div class="stat-sub">Wrong password</div></div>
+    <div class="stat blue"><div class="stat-lbl">Active Sessions</div><div class="stat-val" id="sec-sessions">1</div><div class="stat-sub">Admin sessions</div></div>
+    <div class="stat gold"><div class="stat-lbl">Last Login</div><div class="stat-val" id="sec-last" style="font-size:14px">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Change Admin Password</span>
+    </div>
+    <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="ff"><label>Current Password</label><input type="password" class="inp" id="cp-current" placeholder="Current password"/></div>
+      <div class="ff"><label>New Password</label><input type="password" class="inp" id="cp-new" placeholder="Min 8 chars"/></div>
+      <div class="ff"><label>Confirm New</label><input type="password" class="inp" id="cp-confirm" placeholder="Repeat new password"/></div>
+    </div>
+    <div style="padding:0 16px 16px">
+      <button class="btn btn-g" onclick="changePassword()">Update Password</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Security Event Log</span></div>
+    <div style="padding:8px 14px" id="sec-log"></div>
+  </div>
+</div>
+
+<!-- WHATSAPP BLAST -->
+<div class="pg" id="pg-wa-blast">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Compose Message</span></div>
+      <div style="padding:14px">
+        <div class="ff" style="margin-bottom:10px"><label>Target Group</label>
+          <select class="inp" id="wa-group" onchange="buildWAPreview()">
+            <option value="all">All Customers</option>
+            <option value="active">Active (7 days)</option>
+            <option value="gold">Digital Gold Holders</option>
+            <option value="scheme">Saving Scheme Members</option>
+            <option value="inactive">Inactive (30+ days)</option>
+          </select>
+        </div>
+        <div class="ff" style="margin-bottom:10px"><label>Message Template</label>
+          <select class="inp" id="wa-template" onchange="loadTemplate()">
+            <option value="custom">Custom Message</option>
+            <option value="gold-rate">Gold Rate Update</option>
+            <option value="scheme-reminder">Scheme Payment Reminder</option>
+            <option value="offer">Special Offer</option>
+            <option value="festival">Festival Greeting</option>
+          </select>
+        </div>
+        <div class="ff" style="margin-bottom:10px"><label>Message (use {name}, {phone}, {city})</label>
+          <textarea class="inp" id="wa-msg" rows="8" oninput="buildWAPreview()" placeholder="Type your message here...
+
+Use {name} for customer name
+Use {gold_grams} for gold balance
+Use {savings} for total savings shown"></textarea>
+        </div>
+        <button class="btn btn-gn" onclick="buildWAPreview()" style="width:100%;justify-content:center;padding:10px;margin-bottom:8px">Preview Message</button>
+        <div style="font-size:11px;color:var(--dim)" id="wa-count">0 recipients selected</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Preview & Send</span><span class="card-sub" id="wa-recipient-count"></span></div>
+      <div style="padding:14px">
+        <div class="wa-preview" id="wa-preview">Select a template or type a message…</div>
+        <div class="wa-actions">
+          <button class="btn btn-gn" onclick="sendWABlast()" style="flex:1;justify-content:center;padding:10px">💬 Open WhatsApp Links</button>
+          <button class="btn btn-o" onclick="copyWAList()">📋 Copy All</button>
+        </div>
+        <div style="margin-top:12px" id="wa-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORTS -->
+<div class="pg" id="pg-exports">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Customer Data</span></div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+        <a href="/export/customers/excel" class="btn btn-gn" style="justify-content:center;padding:11px">📊 Customers Excel (Full)</a>
+        <button class="btn btn-o" onclick="exportCustCSV()" style="justify-content:center;padding:11px">📄 Customers CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Leads & Analyses</span></div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+        <a href="/export/leads/excel" class="btn btn-gn" style="justify-content:center;padding:11px">📊 Leads Excel (Full)</a>
+        <button class="btn btn-o" onclick="exportLeadsCSV()" style="justify-content:center;padding:11px">📄 Leads CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Financial Data</span></div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-gn" onclick="exportSchemes()" style="justify-content:center;padding:11px">📊 Saving Schemes</button>
+        <button class="btn btn-o" onclick="exportGold()" style="justify-content:center;padding:11px">📄 Digital Gold</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODALS -->
+<div class="modal-bg" id="lead-modal">
+  <div class="modal">
+    <h3>Analysis Detail <button class="mclose" onclick="closeM('lead-modal')">✕</button></h3>
+    <div id="lead-modal-body"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="gold-modal">
+  <div class="modal" style="max-width:440px">
+    <h3>Add Gold Transaction <button class="mclose" onclick="closeM('gold-modal')">✕</button></h3>
+    <div class="fg">
+      <div class="ff"><label>Customer Phone</label><input class="inp" id="gm-phone" placeholder="Phone"/></div>
+      <div class="ff"><label>Type</label><select class="inp" id="gm-type"><option value="admin_credit">Credit (Add)</option><option value="admin_debit">Debit (Remove)</option><option value="buy">Buy</option><option value="sell">Sell</option><option value="reward">Reward</option></select></div>
+      <div class="ff"><label>Grams</label><input class="inp" id="gm-grams" type="number" step="0.001" placeholder="0.000"/></div>
+      <div class="ff"><label>Amount (Rs)</label><input class="inp" id="gm-amount" type="number" placeholder="0"/></div>
+      <div class="ff full"><label>Notes</label><input class="inp" id="gm-notes" placeholder="Reason"/></div>
+    </div>
+    <div class="macts">
+      <button class="btn btn-o" onclick="closeM('gold-modal')">Cancel</button>
+      <button class="btn btn-g" onclick="submitGold()">Add Transaction</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="scheme-modal">
+  <div class="modal" style="max-width:440px">
+    <h3 id="sch-modal-title">Edit Scheme <button class="mclose" onclick="closeM('scheme-modal')">✕</button></h3>
+    <div class="fg" id="sch-modal-body"></div>
+    <div class="macts">
+      <button class="btn btn-rd" id="sch-del-btn">Delete Scheme</button>
+      <button class="btn btn-o" onclick="closeM('scheme-modal')">Cancel</button>
+      <button class="btn btn-g" onclick="saveScheme()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="cust-edit-modal">
+  <div class="modal" style="max-width:480px">
+    <h3>Edit Customer <button class="mclose" onclick="closeM('cust-edit-modal')">✕</button></h3>
+    <div class="fg" id="ce-body"></div>
+    <div class="macts">
+      <button class="btn btn-rd" id="ce-del-btn">Delete Account</button>
+      <button class="btn btn-o" onclick="closeM('cust-edit-modal')">Cancel</button>
+      <button class="btn btn-g" onclick="saveCustEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECURITY — Admin Authentication
+// ══════════════════════════════════════════════════════════════════════════════
+var ADMIN_KEY = 'sai_adm_' + location.hostname;
+var MAX_ATTEMPTS = 5;
+var LOCKOUT_MS   = 15 * 60 * 1000; // 15 minutes
+
+function emergencyReset() {
+  sessionStorage.removeItem('adm_sec');
+  document.getElementById('lg-err').style.display = 'none';
+  document.getElementById('lg-attempts').textContent = '';
+  document.getElementById('lg-pass').value = '';
+  document.getElementById('lg-pass').focus();
+  alert('Lockout cleared. Default password: Saheehisab@2024');
+}
+
+function getSecState() {
+  try { return JSON.parse(sessionStorage.getItem('adm_sec') || '{}'); } catch(e) { return {}; }
+}
+function setSecState(s) { sessionStorage.setItem('adm_sec', JSON.stringify(s)); }
+
+function logSecEvent(type, msg) {
+  var events = JSON.parse(localStorage.getItem('adm_events') || '[]');
+  events.unshift({ type: type, msg: msg, time: new Date().toISOString() });
+  events = events.slice(0, 100);
+  localStorage.setItem('adm_events', JSON.stringify(events));
+}
+
+function isAuthed() {
+  var tok = sessionStorage.getItem(ADMIN_KEY);
+  return tok && tok.length > 5;
+}
+
+function doLogin() {
+  var sec = getSecState();
+  var now = Date.now();
+
+  if (sec.lockedUntil && now < sec.lockedUntil) {
+    var mins = Math.ceil((sec.lockedUntil - now) / 60000);
+    showErr("Too many failed attempts. Locked for " + mins + " more minute(s).");
+    document.getElementById("lg-attempts").textContent = "Locked — try again in " + mins + " min";
+    return;
+  }
+
+  var pass   = document.getElementById("lg-pass").value;
+  // Default password — stored as plain in localStorage after first change
+  var stored = localStorage.getItem("adm_pw") || "Saheehisab@2024";
+
+  if (pass !== stored) {
+    sec.fails = (sec.fails || 0) + 1;
+    logSecEvent("bad", "Failed login attempt " + sec.fails);
+    if (sec.fails >= MAX_ATTEMPTS) {
+      sec.lockedUntil = now + LOCKOUT_MS;
+      sec.fails = 0;
+      showErr("Account locked for 15 minutes after " + MAX_ATTEMPTS + " failed attempts.");
+      logSecEvent("bad", "Admin locked out for 15 minutes");
+    } else {
+      showErr("Incorrect password. " + (MAX_ATTEMPTS - sec.fails) + " attempt(s) remaining.");
+    }
+    setSecState(sec);
+    document.getElementById("lg-pass").value = "";
+    return;
+  }
+
+  // Auth success
+  sec.fails = 0;
+  sec.lockedUntil = 0;
+  setSecState(sec);
+  var token = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  sessionStorage.setItem(ADMIN_KEY, token);
+  logSecEvent("ok", "Successful admin login");
+  localStorage.setItem("adm_last_login", new Date().toISOString());
+
+  document.getElementById("login-gate").style.display = "none";
+  document.getElementById("sidebar").style.display = "";
+  document.getElementById("topbar").style.display = "";
+  document.getElementById("main").style.display = "";
+  loadAll();
+  startClock();
+}
+
+function showErr(msg) {
+  var e = document.getElementById('lg-err');
+  e.textContent = msg;
+  e.style.display = 'block';
+  setTimeout(function(){ e.style.display = 'none'; }, 5000);
+}
+
+function adminLogout() {
+  sessionStorage.removeItem(ADMIN_KEY);
+  sessionStorage.removeItem('adm_sec');
+  logSecEvent('ok', 'Admin signed out');
+  document.getElementById('login-gate').style.display = 'flex';
+  document.getElementById('sidebar').style.display = 'none';
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('lg-pass').value = '';
+  document.getElementById('lg-err').style.display = 'none';
+  document.getElementById('lg-attempts').textContent = '';
+}
+
+function changePassword() {
+  var cur    = document.getElementById("cp-current").value;
+  var nw     = document.getElementById("cp-new").value;
+  var cnf    = document.getElementById("cp-confirm").value;
+  var stored = localStorage.getItem("adm_pw") || "Saheehisab@2024";
+
+  if (cur !== stored) { toast("Current password incorrect"); return; }
+  if (nw.length < 8)  { toast("Minimum 8 characters required"); return; }
+  if (nw !== cnf)     { toast("Passwords do not match"); return; }
+
+  localStorage.setItem("adm_pw", nw);
+  logSecEvent("ok", "Admin password changed");
+  toast("Password updated! Use new password next login.");
+  document.getElementById("cp-current").value = "";
+  document.getElementById("cp-new").value = "";
+  document.getElementById("cp-confirm").value = "";
+}
+
+// Check if already authed on load
+window.addEventListener('load', function() {
+  if (isAuthed()) {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('sidebar').style.display = '';
+    document.getElementById('topbar').style.display = '';
+    document.getElementById('main').style.display = '';
+    loadAll();
+    startClock();
+  }
+  document.getElementById('lg-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════════
+var S = {
+  leads:[], customers:[], goldUsers:[], schemes:[], rates:{}, catalogue:[],
+  goldRate24k:9850,
+  filters: { lead:'all', cust:'all', scheme:'all' },
+  search: { lead:'', cust:'', gold:'', scheme:'' },
+  currentScheme: null, currentCustPhone: null,
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CLOCK & NAV
+// ══════════════════════════════════════════════════════════════════════════════
+function startClock() {
+  function tick() {
+    var d = new Date();
+    document.getElementById('clock').textContent =
+      d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'}) + ' ' +
+      d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+var PAGE_TITLES = {
+  dashboard:'Dashboard', analytics:'Leads & Analyses', insights:'Business Insights',
+  customers:'Customer Management', 'customer-view':'Customer Profile',
+  gold:'Digital Gold', schemes:'Saving Schemes', catalogue:'Catalogue',
+  rates:'Gold Rates', security:'Security Centre', 'wa-blast':'WhatsApp Blast', exports:'Data Export',
+};
+
+function go(id) {
+  document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('on'); });
+  document.getElementById('pg-' + id).classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if ((n.getAttribute('onclick')||'').indexOf("go('"+id+"')") !== -1) n.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || id;
+  var renderers = {
+    dashboard: renderDashboard, analytics: renderAnalytics, insights: renderInsights,
+    customers: renderCustomers, gold: renderGold, schemes: renderSchemes,
+    catalogue: renderCatalogue, rates: renderRates, security: renderSecurity,
+    'wa-blast': initWABlast, exports: function(){},
+  };
+  if (renderers[id]) renderers[id]();
+  // Scroll to top on page switch
+  var mainEl = document.getElementById('main');
+  if (mainEl) mainEl.scrollTop = 0;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadAll() {
+  try {
+    var [lr, cr, gr, sr, rr, catr] = await Promise.all([
+      fetch('/leads').then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch('/admin/customers').then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch('/gold/users').then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch('/gold/all-schemes').then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch('/rates').then(function(r){return r.json();}).catch(function(){return{};}),
+      fetch('/catalogue/items').then(function(r){return r.json();}).catch(function(){return{};})
+    ]);
+    if (lr.success)   S.leads     = lr.leads    || [];
+    if (cr.success)   S.customers = cr.customers|| [];
+    if (gr.success)   S.goldUsers = gr.users    || [];
+    if (sr.success)   S.schemes   = sr.schemes  || [];
+    if (rr.success)   { S.rates = rr.rates; S.goldRate24k = rr.rates.gold_24k||9850; }
+    if (catr.success) S.catalogue = catr.items  || [];
+
+    document.getElementById('nb-leads').textContent = S.leads.length;
+    document.getElementById('nb-custs').textContent = S.customers.length;
+    renderDashboard();
+  } catch(e) { console.error('loadAll:', e); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+function rs(n) { return 'Rs.' + Math.round(parseFloat(n)||0).toLocaleString('en-IN'); }
+function rsl(n) { return 'Rs.' + Math.round((parseFloat(n)||0)/100000).toFixed(1) + 'L'; }
+function dt(ts, short) {
+  if (!ts) return '—';
+  var d = new Date(ts);
+  if (short) return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+function dtTime(ts) {
+  if (!ts) return '—';
+  var d = new Date(ts);
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' ' +
+         d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+function custFavCat(phone) {
+  var cats = {};
+  S.leads.filter(function(l){ return l.phone===phone||l.customer_phone===phone; })
+          .forEach(function(l){ if(l.jewellery_type){cats[l.jewellery_type]=(cats[l.jewellery_type]||0)+1;} });
+  var best = Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];})[0];
+  return best || '—';
+}
+function barRows(data, colorClass, unit) {
+  var max = Math.max.apply(null, Object.values(data)) || 1;
+  return Object.keys(data).slice(0,8).map(function(k){
+    var v = data[k];
+    return '<div class="bar-row"><span class="bar-lbl">' + k + '</span>' +
+      '<div class="bar-track"><div class="bar-fill ' + (colorClass||'') + '" style="width:' + Math.round(v/max*100) + '%"></div></div>' +
+      '<span class="bar-val">' + (unit==='Rs' ? rs(v) : v) + '</span></div>';
+  }).join('') || '<div style="color:var(--dim);font-size:11px;padding:4px">No data yet</div>';
+}
+function topN(arr, key, n) {
+  var m = {};
+  arr.forEach(function(x){ var k=x[key]||'other'; m[k]=(m[k]||0)+1; });
+  return Object.fromEntries(Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,n||8));
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════════════════════
+function renderDashboard() {
+  var today = new Date().toDateString();
+  var todayLeads = S.leads.filter(function(l){ return new Date(l.timestamp).toDateString()===today; });
+  var totalSav = S.leads.reduce(function(s,l){ return s+(parseFloat(l.estimated_savings)||0); }, 0);
+  var totalGrams = S.goldUsers.reduce(function(s,u){ return s+(parseFloat(u.gold_grams)||0); }, 0);
+  var active = S.schemes.filter(function(s){ return s.status==='active'; });
+  var monthly = active.reduce(function(s,sc){ return s+(parseFloat(sc.monthly_amount)||0); }, 0);
+
+  document.getElementById('ds-stats').innerHTML = [
+    ['gold','Total Customers', S.customers.length, 'Registered members'],
+    ['green','Today\'s Analyses', todayLeads.length, 'Price comparisons today'],
+    ['blue','Total Analyses', S.leads.filter(function(l){return ['url','image'].indexOf(l.type)!==-1;}).length, 'All time'],
+    ['purple','Savings Shown', rsl(totalSav), 'vs store prices'],
+    ['orange','Digital Gold', totalGrams.toFixed(2)+'g', 'Total across all accounts'],
+    ['green','Monthly Collection', rs(monthly), 'From active schemes'],
+  ].map(function(s){
+    return '<div class="stat '+s[0]+'"><div class="stat-lbl">'+s[1]+'</div><div class="stat-val">'+s[2]+'</div><div class="stat-sub">'+s[3]+'</div></div>';
+  }).join('');
+
+  // Charts
+  var cats = topN(S.leads, 'jewellery_type', 6);
+  var days = {};
+  for (var d = 6; d >= 0; d--) {
+    var dd = new Date(); dd.setDate(dd.getDate()-d);
+    days[dd.toLocaleDateString('en-IN',{weekday:'short'})] = 0;
+  }
+  S.leads.forEach(function(l){
+    var diff = Math.floor((Date.now() - new Date(l.timestamp)) / 86400000);
+    if (diff < 7) {
+      var k = new Date(l.timestamp).toLocaleDateString('en-IN',{weekday:'short'});
+      if (days[k] !== undefined) days[k]++;
+    }
+  });
+
+  document.getElementById('ds-charts').innerHTML =
+    '<div class="chart-card"><div class="chart-title">Top Jewellery Categories</div><div class="bar-rows">' + barRows(cats) + '</div></div>' +
+    '<div class="chart-card"><div class="chart-title">Analyses This Week</div><div class="bar-rows">' + barRows(days) + '</div></div>';
+
+  document.getElementById('ds-activity-time').textContent = 'Last updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  var recent = S.leads.slice(0, 15);
+  document.getElementById('ds-recent').innerHTML = recent.map(function(l){
+    var sav = parseFloat(l.estimated_savings)||0;
+    var cust = S.customers.find(function(c){ return c.phone===l.phone||c.phone===l.customer_phone; });
+    var custName = cust ? cust.name : (l.name||'Guest');
+    return '<tr onclick="showLead(\''+l.lead_id+'\')">' +
+      '<td style="color:var(--dim);white-space:nowrap">' + dtTime(l.timestamp) + '</td>' +
+      '<td style="font-weight:500">' + (custName||'—') + '</td>' +
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (l.product_name||l.item||'—') + '</td>' +
+      '<td><span class="tag tg">' + (l.jewellery_type||'—') + '</span></td>' +
+      '<td>' + (l.website_price ? rs(l.website_price) : '—') + '</td>' +
+      '<td style="color:var(--gold)">' + (l.saheehisab_price ? rs(l.saheehisab_price) : '—') + '</td>' +
+      '<td style="color:var(--green)">' + (sav>0 ? '+'+rs(sav) : '—') + '</td>' +
+      '<td><span class="tag ' + {url:'tg',image:'tbl',invoice:'tpu',enquiry:'tdm'}[l.type||'url'] + '">' + (l.type||'url') + '</span></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=8 class="empty">No activity yet</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════════════════════════════════════════════
+// ── ANALYTICS (TABBED) ─────────────────────────────────────────────────────
+var _anTab = 'url';
+var _anSearch = { url:'', image:'', exchange:'', gold:'', signups:'' };
+
+function switchAnTab(tab, el) {
+  _anTab = tab;
+  ['url','image','exchange','gold','signups'].forEach(function(t) {
+    var el2 = document.getElementById('an-tab-' + t);
+    if (el2) el2.style.display = (t === tab) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.an-tab').forEach(function(b) {
+    b.style.color = 'var(--dim)';
+    b.style.background = 'transparent';
+  });
+  if (el) { el.style.color = 'var(--gold)'; el.style.background = 'rgba(201,168,76,.08)'; }
+  renderAnalyticsTab(tab);
+}
+
+function filterLeadsTab(q, tab) {
+  _anSearch[tab] = q.toLowerCase();
+  renderAnalyticsTab(tab);
+}
+
+function renderAnalytics() {
+  // Stats
+  var urlLeads = S.leads.filter(function(l){return l.type==='url';});
+  var imgLeads = S.leads.filter(function(l){return l.type==='image'||l.type==='invoice';});
+  var totalSav = S.leads.reduce(function(s,l){return s+(parseFloat(l.estimated_savings)||0);},0);
+  var signups  = S.leads.filter(function(l){return l.type==='customer_signup'||l.type==='enquiry';});
+
+  document.getElementById('an-stats').innerHTML = [
+    ['gold','URL Analyses', urlLeads.length, 'Store comparisons'],
+    ['blue','Image/Invoice', imgLeads.length, 'Uploads analysed'],
+    ['green','Savings Shown', rsl(totalSav), 'vs store prices'],
+    ['purple','Signups', signups.length, 'New registrations'],
+    ['orange','Exchange Calcs', S.leads.filter(function(l){return l.type==='exchange_calc';}).length, 'Old gold queries'],
+  ].map(function(s){
+    return '<div class="stat '+s[0]+'" style="margin-bottom:0"><div class="stat-lbl">'+s[1]+'</div><div class="stat-val">'+s[2]+'</div><div class="stat-sub">'+s[3]+'</div></div>';
+  }).join('');
+
+  renderAnalyticsTab(_anTab);
+}
+
+function renderAnalyticsTab(tab) {
+  if (tab === 'url')      renderURLLeads();
+  if (tab === 'image')    renderImageLeads();
+  if (tab === 'exchange') renderExchangeLeads();
+  if (tab === 'gold')     renderGoldLeads();
+  if (tab === 'signups')  renderSignupLeads();
+}
+
+function renderURLLeads() {
+  var list = S.leads.filter(function(l){ return l.type==='url'; });
+  var q = _anSearch.url;
+  if (q) list = list.filter(function(l){ return JSON.stringify(l).toLowerCase().indexOf(q)!==-1; });
+  document.getElementById('an-url-body').innerHTML = list.map(function(l){
+    var sav = parseFloat(l.estimated_savings)||0;
+    var cust = S.customers.find(function(c){ return c.phone===(l.phone||l.customer_phone); });
+    var storeHost = '';
+    try { if(l.source_url) storeHost = new URL(l.source_url).hostname.replace('www.','').split('.')[0]; } catch(e){}
+    return '<tr onclick="showLeadById(this)" data-lid="'+(l.lead_id||l.timestamp)+'">' +
+      '<td style="color:var(--dim);white-space:nowrap">'+dtTime(l.timestamp)+'</td>' +
+      '<td>'+(cust?cust.name:l.name||'Guest')+'</td>' +
+      '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(l.product_name||'—')+'</td>' +
+      '<td><span class="tag tg">'+(l.jewellery_type||'—')+'</span></td>' +
+      '<td style="color:var(--dim)">'+(l.gold_weight?l.gold_weight+'g':'—')+'</td>' +
+      '<td style="color:var(--dim)">'+(l.purity||'—')+'</td>' +
+      '<td>'+(l.website_price?rs(l.website_price):'—')+'</td>' +
+      '<td style="color:var(--gold)">'+(l.saheehisab_price?rs(l.saheehisab_price):'—')+'</td>' +
+      '<td style="color:var(--green)">'+(sav>0?'+'+rs(sav):'—')+'</td>' +
+      '<td style="color:var(--dim)">'+(storeHost||'—')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=10 class="empty">No URL analyses yet</td></tr>';
+}
+
+function renderImageLeads() {
+  var list = S.leads.filter(function(l){ return l.type==='image'||l.type==='invoice'; });
+  var q = _anSearch.image;
+  if (q) list = list.filter(function(l){ return JSON.stringify(l).toLowerCase().indexOf(q)!==-1; });
+  document.getElementById('an-image-body').innerHTML = list.map(function(l){
+    var sav = parseFloat(l.estimated_savings)||0;
+    var cust = S.customers.find(function(c){ return c.phone===(l.phone||l.customer_phone); });
+    return '<tr onclick="showLeadById(this)" data-lid="'+(l.lead_id||l.timestamp)+'">' +
+      '<td style="color:var(--dim);white-space:nowrap">'+dtTime(l.timestamp)+'</td>' +
+      '<td><span class="tag '+(l.type==='invoice'?'tpu':'tbl')+'">'+(l.type||'image')+'</span></td>' +
+      '<td>'+(cust?cust.name:l.name||'Guest')+'</td>' +
+      '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(l.product_name||'—')+'</td>' +
+      '<td><span class="tag tg">'+(l.jewellery_type||'—')+'</span></td>' +
+      '<td style="color:var(--dim)">'+(l.gold_weight?l.gold_weight+'g':'—')+'</td>' +
+      '<td>'+(l.website_price?rs(l.website_price):'—')+'</td>' +
+      '<td style="color:var(--gold)">'+(l.saheehisab_price?rs(l.saheehisab_price):'—')+'</td>' +
+      '<td style="color:var(--green)">'+(sav>0?'+'+rs(sav):'—')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=9 class="empty">No image/invoice uploads yet</td></tr>';
+}
+
+function renderExchangeLeads() {
+  var list = S.leads.filter(function(l){ return l.type==='exchange_calc'||l.type==='exchange'; });
+  var q = _anSearch.exchange;
+  if (q) list = list.filter(function(l){ return JSON.stringify(l).toLowerCase().indexOf(q)!==-1; });
+  document.getElementById('an-exchange-body').innerHTML = list.map(function(l){
+    var cust = S.customers.find(function(c){ return c.phone===(l.phone||l.customer_phone); });
+    return '<tr>' +
+      '<td style="color:var(--dim);white-space:nowrap">'+dtTime(l.timestamp)+'</td>' +
+      '<td>'+(cust?cust.name:l.name||'Guest')+'</td>' +
+      '<td style="color:var(--gold)">'+(l.gold_weight?l.gold_weight+'g':'—')+'</td>' +
+      '<td style="color:var(--dim)">'+(l.purity||'—')+'</td>' +
+      '<td style="color:var(--green)">'+(l.estimated_savings?rs(l.estimated_savings):'—')+'</td>' +
+      '<td style="color:var(--dim);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(l.notes||l.message||'—')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=6 class="empty">No exchange calculations yet</td></tr>';
+}
+
+function renderGoldLeads() {
+  var list = S.leads.filter(function(l){ return l.type&&(l.type.indexOf('gold_')===0||l.type.indexOf('gold')===0)&&l.type!=='gold_emi'; });
+  var q = _anSearch.gold;
+  if (q) list = list.filter(function(l){ return JSON.stringify(l).toLowerCase().indexOf(q)!==-1; });
+  document.getElementById('an-gold-body').innerHTML = list.map(function(l){
+    var cust = S.customers.find(function(c){ return c.phone===(l.phone||l.customer_phone); });
+    var isBuy = l.type==='gold_buy'||l.type==='buy';
+    return '<tr>' +
+      '<td style="color:var(--dim);white-space:nowrap">'+dtTime(l.timestamp)+'</td>' +
+      '<td>'+(cust?cust.name:l.name||l.phone||'Guest')+'</td>' +
+      '<td><span class="tag '+(isBuy?'tgn':'trd')+'">'+l.type+'</span></td>' +
+      '<td style="color:var(--gold)">'+(l.gold_weight?parseFloat(l.gold_weight).toFixed(4)+'g':'—')+'</td>' +
+      '<td>'+(l.website_price||l.amount?rs(l.website_price||l.amount):'—')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=5 class="empty">No gold transactions logged yet</td></tr>';
+}
+
+function renderSignupLeads() {
+  var list = S.leads.filter(function(l){ return l.type==='customer_signup'||l.type==='enquiry'||l.type==='gold_emi'; });
+  var q = _anSearch.signups;
+  if (q) list = list.filter(function(l){ return JSON.stringify(l).toLowerCase().indexOf(q)!==-1; });
+  document.getElementById('an-signups-body').innerHTML = list.map(function(l){
+    var cls = {customer_signup:'tgn',enquiry:'tbl',gold_emi:'tpu'}[l.type]||'tdm';
+    return '<tr>' +
+      '<td style="color:var(--dim);white-space:nowrap">'+dtTime(l.timestamp)+'</td>' +
+      '<td><span class="tag '+cls+'">'+l.type+'</span></td>' +
+      '<td>'+(l.name||'—')+'</td>' +
+      '<td style="font-family:monospace;color:var(--dim)">'+(l.phone||'—')+'</td>' +
+      '<td style="color:var(--dim)">'+(l.email||'—')+'</td>' +
+      '<td>'+(l.city||'—')+'</td>' +
+      '<td style="color:var(--dim);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(l.message||l.notes||'—')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=7 class="empty">No signups or enquiries yet</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INSIGHTS
+// ══════════════════════════════════════════════════════════════════════════════
+function renderInsights() {
+  // Category breakdown
+  var cats = topN(S.leads, 'jewellery_type', 8);
+  document.getElementById('ins-cats').innerHTML = barRows(cats);
+
+  // Store breakdown
+  var stores = {};
+  S.leads.forEach(function(l){
+    if (l.source_url) {
+      try {
+        var h = new URL(l.source_url).hostname.replace('www.','').split('.')[0];
+        stores[h] = (stores[h]||0)+1;
+      } catch(e){}
+    }
+  });
+  stores = Object.fromEntries(Object.entries(stores).sort(function(a,b){return b[1]-a[1];}).slice(0,8));
+  document.getElementById('ins-stores').innerHTML = barRows(stores);
+
+  // Purity breakdown
+  var purity = topN(S.leads, 'purity', 6);
+  document.getElementById('ins-purity').innerHTML = barRows(purity);
+
+  // Daily 14 days
+  var daily = {};
+  for (var d = 13; d >= 0; d--) {
+    var dd = new Date(); dd.setDate(dd.getDate()-d);
+    daily[dd.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})] = 0;
+  }
+  S.leads.forEach(function(l){
+    var diff = Math.floor((Date.now()-new Date(l.timestamp))/86400000);
+    if (diff < 14) {
+      var k = new Date(l.timestamp).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+      if (daily[k]!==undefined) daily[k]++;
+    }
+  });
+  document.getElementById('ins-daily').innerHTML = barRows(daily);
+
+  // Most searched products
+  var prods = {};
+  S.leads.forEach(function(l){
+    var k = (l.product_name||'').trim();
+    if (!k || k.length < 3) return;
+    if (!prods[k]) prods[k] = { count:0, savings:0, price:0, cat:l.jewellery_type||'—' };
+    prods[k].count++;
+    prods[k].savings += parseFloat(l.estimated_savings)||0;
+    prods[k].price   += parseFloat(l.website_price)||0;
+  });
+  var sortedProds = Object.keys(prods).sort(function(a,b){ return prods[b].count-prods[a].count; }).slice(0,15);
+  document.getElementById('ins-products').innerHTML = sortedProds.map(function(name,i){
+    var p = prods[name];
+    var avgSav = p.count > 0 ? p.savings/p.count : 0;
+    var avgPrc = p.count > 0 ? p.price/p.count   : 0;
+    return '<tr><td>' + (i+1)+'. '+name.slice(0,40) + '</td>' +
+      '<td style="color:var(--gold)">' + p.count + '</td>' +
+      '<td style="color:var(--green)">' + (avgSav>0?rs(avgSav):'—') + '</td>' +
+      '<td>' + (avgPrc>0?rs(avgPrc):'—') + '</td>' +
+      '<td><span class="tag tg">' + p.cat + '</span></td></tr>';
+  }).join('') || '<tr><td colspan=5 class="empty">No product data</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CUSTOMERS
+// ══════════════════════════════════════════════════════════════════════════════
+var _custFilter = 'all', _custSearch = '';
+function setCustFilter(f, el) {
+  _custFilter = f;
+  document.querySelectorAll('#cust-pills .pill').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+  renderCustomers();
+}
+function filterCustomers(q) { _custSearch = q.toLowerCase(); renderCustomers(); }
+
+function renderCustomers() {
+  var list = S.customers;
+  if (_custSearch) list = list.filter(function(c){
+    return (c.name||'').toLowerCase().indexOf(_custSearch)!==-1 ||
+           (c.phone||'').indexOf(_custSearch)!==-1 ||
+           (c.email||'').toLowerCase().indexOf(_custSearch)!==-1;
+  });
+  var now7  = Date.now() - 7*86400000;
+  var now30 = Date.now() - 30*86400000;
+  if (_custFilter==='active') list = list.filter(function(c){ return c.last_login && new Date(c.last_login).getTime()>now7; });
+  if (_custFilter==='gold')   list = list.filter(function(c){ return parseFloat(c.gold_grams||0)>0; });
+  if (_custFilter==='scheme') list = list.filter(function(c){ return (c.active_schemes||0)>0; });
+  if (_custFilter==='new')    list = list.filter(function(c){ return c.member_since && new Date(c.member_since).getTime()>now30; });
+
+  document.getElementById('cust-body').innerHTML = list.map(function(c,i){
+    var fav  = custFavCat(c.phone);
+    var sav  = rs(c.savings_shown||0);
+    var ph   = (c.phone||'').replace(/[^0-9]/g,'');
+    return '<tr onclick="viewCustomer(\''+ph+'\')">' +
+      '<td style="color:var(--dim)">' + (i+1) + '</td>' +
+      '<td><b>' + (c.name||'—') + '</b></td>' +
+      '<td style="font-family:monospace;color:var(--dim)">' + (c.phone||'—') + '</td>' +
+      '<td style="color:var(--dim)">' + (c.email||'—') + '</td>' +
+      '<td>' + (c.city||'—') + '</td>' +
+      '<td style="color:var(--gold)">' + (c.analyses_count||0) + '</td>' +
+      '<td><span class="tag tg">' + fav + '</span></td>' +
+      '<td style="color:var(--green)">' + sav + '</td>' +
+      '<td style="color:var(--gold)">' + parseFloat(c.gold_grams||0).toFixed(3)+'g' + '</td>' +
+      '<td style="color:var(--dim)">' + dt(c.last_login) + '</td>' +
+      '<td onclick="event.stopPropagation()"><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-o" style="padding:4px 8px;font-size:10px" onclick="openCustEdit(\''+ph+'\')">Edit</button>' +
+        '<a href="https://wa.me/'+ph+'" target="_blank" class="btn btn-gn" style="padding:4px 8px;font-size:10px">WhatsApp</a>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=11 class="empty">No customers found</td></tr>';
+}
+
+function viewCustomer(phone) {
+  S.currentCustPhone = phone;
+  var c = S.customers.find(function(x){ return (x.phone||'').replace(/[^0-9]/g,'')===phone; });
+  if (!c) return;
+
+  // Show in-page profile
+  document.getElementById('nav-custview').style.display = 'flex';
+  go('customer-view');
+
+  var custLeads = S.leads.filter(function(l){
+    return (l.phone||l.customer_phone||'') === c.phone;
+  });
+  var goldAcc = S.goldUsers.find(function(u){ return u.phone===c.phone; });
+  var custSchemes = S.schemes.filter(function(s){ return s.phone===c.phone; });
+  var totalSav = custLeads.reduce(function(s,l){ return s+(parseFloat(l.estimated_savings)||0); }, 0);
+
+  // Favourite categories
+  var custCats = {};
+  custLeads.forEach(function(l){ if(l.jewellery_type){custCats[l.jewellery_type]=(custCats[l.jewellery_type]||0)+1;} });
+  var sortedCats = Object.keys(custCats).sort(function(a,b){return custCats[b]-custCats[a];});
+
+  // Favourite stores
+  var custStores = {};
+  custLeads.forEach(function(l){
+    if(l.source_url){try{var h=new URL(l.source_url).hostname.replace('www.','').split('.')[0];custStores[h]=(custStores[h]||0)+1;}catch(e){}}
+  });
+  var sortedStores = Object.keys(custStores).sort(function(a,b){return custStores[b]-custStores[a];});
+
+  document.getElementById('cv-content').innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+      '<div></div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button class="btn btn-o" onclick="openCustEdit(\''+phone+'\')">✏ Edit Profile</button>' +
+        '<a href="https://wa.me/'+phone+'" target="_blank" class="btn btn-gn">💬 WhatsApp</a>' +
+        '<button class="btn btn-o" onclick="sendCustomerReport(\''+phone+'\')">📊 Send Report</button>' +
+        '<button class="btn btn-rd" onclick="deleteCustomer(\''+phone+'\')">🗑 Delete</button>' +
+      '</div>' +
+    '</div>' +
+
+    // Hero
+    '<div class="cust-hero">' +
+      '<div class="cust-avatar">' + (c.name||'?').charAt(0).toUpperCase() + '</div>' +
+      '<div>' +
+        '<div class="cust-name">' + (c.name||'—') + '</div>' +
+        '<div class="cust-ph">' + (c.phone||'—') + ' · ' + (c.email||'—') + '</div>' +
+        '<div class="cust-since">Member since ' + dt(c.member_since) + ' · City: ' + (c.city||'—') + '</div>' +
+      '</div>' +
+    '</div>' +
+
+    // Mini stats
+    '<div class="mini-stats">' +
+      '<div class="mini-stat"><div class="ms-val">' + custLeads.length + '</div><div class="ms-lbl">Analyses</div></div>' +
+      '<div class="mini-stat"><div class="ms-val" style="color:var(--green)">' + rs(totalSav) + '</div><div class="ms-lbl">Savings Shown</div></div>' +
+      '<div class="mini-stat"><div class="ms-val">' + parseFloat((goldAcc||{}).gold_grams||0).toFixed(4) + 'g</div><div class="ms-lbl">Digital Gold</div></div>' +
+      '<div class="mini-stat"><div class="ms-val">' + custSchemes.filter(function(s){return s.status==='active';}).length + '</div><div class="ms-lbl">Active Schemes</div></div>' +
+    '</div>' +
+
+    // Two columns
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+
+      // Left
+      '<div>' +
+        '<div class="card">' +
+          '<div class="card-head"><span class="card-title">Favourite Categories</span></div>' +
+          '<div style="padding:10px 14px" class="bar-rows">' + barRows(custCats) + '</div>' +
+        '</div>' +
+        '<div class="card">' +
+          '<div class="card-head"><span class="card-title">Stores Checked</span></div>' +
+          '<div style="padding:10px 14px" class="bar-rows">' + barRows(custStores) + '</div>' +
+        '</div>' +
+        (goldAcc ? '<div class="card">' +
+          '<div class="card-head"><span class="card-title">Digital Gold Transactions</span></div>' +
+          '<div style="padding:4px 0">' +
+            (goldAcc.transactions||[]).slice(0,6).map(function(t){
+              return '<div style="display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px">' +
+                '<span style="color:var(--dim)">' + dtTime(t.timestamp) + '</span>' +
+                '<span><span class="tag '+(t.type==='buy'||t.type==='admin_credit'?'tgn':'trd')+'">' + t.type + '</span></span>' +
+                '<span style="color:var(--gold)">' + parseFloat(t.grams||0).toFixed(4) + 'g</span>' +
+                '<span>' + rs(t.amount||0) + '</span>' +
+              '</div>';
+            }).join('') || '<div class="empty">No transactions</div>' +
+          '</div>' +
+        '</div>' : '') +
+      '</div>' +
+
+      // Right — analysis history
+      '<div>' +
+        '<div class="card">' +
+          '<div class="card-head"><span class="card-title">Analysis History (' + custLeads.length + ')</span></div>' +
+          '<div style="padding:8px 14px">' +
+            custLeads.slice(0,20).map(function(l){
+              var sav = parseFloat(l.estimated_savings)||0;
+              var storeHost = '';
+              try { if(l.source_url) storeHost = new URL(l.source_url).hostname.replace('www.','').split('.')[0]; } catch(e){}
+              return '<div class="analysis-item">' +
+                (l.image_url ? '<img class="analysis-img" src="'+l.image_url+'">' : '<div class="analysis-img-ph">💎</div>') +
+                '<div class="analysis-info">' +
+                  '<div class="analysis-name">' + (l.product_name||l.item||'Product').slice(0,35) + '</div>' +
+                  '<div class="analysis-meta">' + dtTime(l.timestamp) + ' · ' + (l.jewellery_type||'—') + ' · ' + (storeHost||'direct') + '</div>' +
+                  '<div class="analysis-meta" style="margin-top:2px">' +
+                    (l.website_price ? '<span style="color:var(--white)">Store: '+rs(l.website_price)+'</span> → ' : '') +
+                    '<span style="color:var(--gold)">Our: ' + (l.saheehisab_price?rs(l.saheehisab_price):'—') + '</span>' +
+                    (sav>0 ? ' <span style="color:var(--green)">Save '+rs(sav)+'</span>' : '') +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+            }).join('') || '<div class="empty">No analyses yet</div>' +
+          '</div>' +
+        '</div>' +
+        (custSchemes.length ? '<div class="card">' +
+          '<div class="card-head"><span class="card-title">Saving Schemes</span></div>' +
+          '<div style="padding:8px 14px">' +
+            custSchemes.map(function(s){
+              var progress = Math.round((s.paid_months||0)/(s.duration_months||12)*100);
+              return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px">' +
+                  '<span style="font-weight:600">' + (s.scheme_id||'').toUpperCase() + '</span>' +
+                  '<span class="tag '+(s.status==='active'?'tgn':s.status==='matured'?'tg':'tdm')+'">' + s.status + '</span>' +
+                '</div>' +
+                '<div style="font-size:11px;color:var(--dim);margin-bottom:6px">' +
+                  rs(s.monthly_amount) + '/month · ' + (s.paid_months||0) + '/' + (s.duration_months||12) + ' months paid' +
+                '</div>' +
+                '<div style="background:var(--bg4);border-radius:4px;height:4px">' +
+                  '<div style="background:linear-gradient(90deg,var(--gold),var(--gold-l));height:4px;border-radius:4px;width:'+progress+'%"></div>' +
+                '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+        '</div>' : '') +
+      '</div>' +
+    '</div>';
+}
+
+function openCustEdit(phone) {
+  var c = S.customers.find(function(x){ return (x.phone||'').replace(/[^0-9]/g,'')===phone; });
+  if (!c) return;
+  S.currentCustPhone = phone;
+  document.getElementById('ce-body').innerHTML =
+    '<div class="ff"><label>Name</label><input class="inp" id="ce-name" value="'+(c.name||'')+'"/></div>' +
+    '<div class="ff"><label>City</label><input class="inp" id="ce-city" value="'+(c.city||'')+'"/></div>' +
+    '<div class="ff full"><label>Email</label><input class="inp" id="ce-email" value="'+(c.email||'')+'"/></div>' +
+    '<div class="ff"><label>Date of Birth</label><input class="inp" type="date" id="ce-dob" value="'+(c.dob||'')+'"/></div>' +
+    '<div class="ff"><label>Anniversary</label><input class="inp" type="date" id="ce-anniv" value="'+(c.anniversary||'')+'"/></div>';
+  document.getElementById('ce-del-btn').onclick = function(){ deleteCustomer(phone); };
+  document.getElementById('cust-edit-modal').classList.add('on');
+}
+
+async function saveCustEdit() {
+  var payload = {
+    phone      : S.currentCustPhone,
+    name       : document.getElementById('ce-name').value.trim(),
+    city       : document.getElementById('ce-city').value.trim(),
+    email      : document.getElementById('ce-email').value.trim(),
+    dob        : document.getElementById('ce-dob').value,
+    anniversary: document.getElementById('ce-anniv').value,
+  };
+  var r = await fetch('/admin/customer/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+  var j = await r.json();
+  if (j.success) { toast('Profile updated'); closeM('cust-edit-modal'); await loadAll(); if (S.currentCustPhone) viewCustomer(S.currentCustPhone); }
+  else { toast('Error: ' + j.error); }
+}
+
+async function deleteCustomer(phone) {
+  if (!confirm('Delete customer permanently? This cannot be undone.')) return;
+  var r = await fetch('/admin/customer/' + encodeURIComponent(phone.replace(/[^0-9]/g,'')), { method:'DELETE' });
+  var j = await r.json();
+  if (j.success) { toast('Customer deleted'); closeM('cust-edit-modal'); await loadAll(); go('customers'); }
+}
+
+function sendCustomerReport(phone) {
+  var c = S.customers.find(function(x){ return (x.phone||'').replace(/[^0-9]/g,'')===phone; });
+  if (!c) return;
+  var custLeads = S.leads.filter(function(l){ return (l.phone||l.customer_phone)===c.phone; });
+  var totalSav  = custLeads.reduce(function(s,l){ return s+(parseFloat(l.estimated_savings)||0); }, 0);
+  var fav       = custFavCat(c.phone);
+  var ph        = (c.phone||'').replace(/[^0-9]/g,'');
+
+  var msg = 'Dear ' + (c.name||'Customer') + ',%0A%0A' +
+    'Your Saheehisab AI Summary 💎%0A%0A' +
+    'Total analyses done: ' + custLeads.length + '%0A' +
+    'Total savings shown: Rs.' + Math.round(totalSav).toLocaleString('en-IN') + '%0A' +
+    'Your favourite: ' + fav + '%0A' +
+    'Digital Gold: ' + parseFloat((S.goldUsers.find(function(u){return u.phone===c.phone;})||{}).gold_grams||0).toFixed(4) + 'g%0A%0A' +
+    'Visit us: https://saheehisab.ai%0A' +
+    'Thank you for choosing Seervi Gems & Jewellery!';
+
+  window.open('https://wa.me/' + ph + '?text=' + msg, '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DIGITAL GOLD
+// ══════════════════════════════════════════════════════════════════════════════
+var _goldSearch = '';
+function filterGold(q) { _goldSearch = q.toLowerCase(); renderGold(); }
+
+function renderGold() {
+  var list = S.goldUsers;
+  if (_goldSearch) list = list.filter(function(u){ return (u.name||'').toLowerCase().indexOf(_goldSearch)!==-1||(u.phone||'').indexOf(_goldSearch)!==-1; });
+  var totalGrams = list.reduce(function(s,u){ return s+(parseFloat(u.gold_grams)||0); }, 0);
+  var totalInv   = list.reduce(function(s,u){ return s+(parseFloat(u.total_invested)||0); }, 0);
+  var portVal    = totalGrams * S.goldRate24k;
+
+  document.getElementById('gl-stats').innerHTML = [
+    ['gold','Accounts', list.length, ''],
+    ['green','Total Gold', totalGrams.toFixed(3)+'g', ''],
+    ['blue','Total Invested', rs(totalInv), ''],
+    ['purple','Portfolio Value', rs(portVal), 'At live 24K rate'],
+    ['orange','P&L', rs(portVal-totalInv), portVal>=totalInv?'Gain':'Loss'],
+  ].map(function(s){
+    return '<div class="stat '+s[0]+'" style="margin-bottom:0"><div class="stat-lbl">'+s[1]+'</div><div class="stat-val">'+s[2]+'</div><div class="stat-sub">'+s[3]+'</div></div>';
+  }).join('');
+
+  document.getElementById('gl-body').innerHTML = list.map(function(u,i){
+    var grams  = parseFloat(u.gold_grams||0);
+    var inv    = parseFloat(u.total_invested||0);
+    var portV  = grams * S.goldRate24k;
+    var pl     = portV - inv;
+    var lastTxn= u.transactions && u.transactions[0] ? dtTime(u.transactions[0].timestamp) : '—';
+    var ph     = (u.phone||'').replace(/[^0-9]/g,'');
+    return '<tr>' +
+      '<td style="color:var(--dim)">' + (i+1) + '</td>' +
+      '<td><b>' + (u.name||'—') + '</b></td>' +
+      '<td style="font-family:monospace;color:var(--dim)">' + (u.phone||'—') + '</td>' +
+      '<td style="color:var(--gold);font-weight:600">' + grams.toFixed(4) + 'g</td>' +
+      '<td>' + rs(inv) + '</td>' +
+      '<td style="color:var(--green)">' + rs(portV) + '</td>' +
+      '<td style="color:'+(pl>=0?'var(--green)':'var(--red)')+'">' + (pl>=0?'+':'') + rs(pl) + '</td>' +
+      '<td style="color:var(--dim)">' + lastTxn + '</td>' +
+      '<td onclick="event.stopPropagation()"><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-g" style="padding:4px 8px;font-size:10px" onclick="openGoldModal(\''+ph+'\')">+ Txn</button>' +
+        '<a href="https://wa.me/'+ph+'" target="_blank" class="btn btn-gn" style="padding:4px 8px;font-size:10px">WhatsApp</a>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=9 class="empty">No gold accounts</td></tr>';
+}
+
+function openGoldModal(phone) {
+  document.getElementById('gm-phone').value  = phone || '';
+  document.getElementById('gm-grams').value  = '';
+  document.getElementById('gm-amount').value = '';
+  document.getElementById('gm-notes').value  = '';
+  document.getElementById('gold-modal').classList.add('on');
+}
+async function submitGold() {
+  var p = { phone:document.getElementById('gm-phone').value.trim(), type:document.getElementById('gm-type').value,
+    grams:parseFloat(document.getElementById('gm-grams').value)||0, amount:parseFloat(document.getElementById('gm-amount').value)||0,
+    notes:document.getElementById('gm-notes').value.trim() };
+  if (!p.phone||!p.grams) { toast('Phone and grams required'); return; }
+  var r = await fetch('/admin/customer/gold/transaction', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
+  var j = await r.json();
+  if (j.success) { toast('Transaction added! Balance: '+parseFloat(j.user.gold_grams).toFixed(4)+'g'); closeM('gold-modal'); await loadAll(); renderGold(); }
+  else { toast('Error: '+j.error); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCHEMES
+// ══════════════════════════════════════════════════════════════════════════════
+var _schemeFilter = 'all', _schemeSearch = '';
+function setSchemeFilter(f, el) {
+  _schemeFilter = f;
+  document.querySelectorAll('#sc-filter-pills .pill').forEach(function(p){p.classList.remove('on');}); 
+  if (el) el.classList.add('on');
+  renderSchemes();
+}
+function filterSchemes(q) { _schemeSearch = q.toLowerCase(); renderSchemes(); }
+
+function renderSchemes() {
+  var list = S.schemes;
+  if (_schemeSearch) list = list.filter(function(s){ return (s.phone||'').indexOf(_schemeSearch)!==-1||(s.scheme_id||'').indexOf(_schemeSearch)!==-1||(s.name||'').toLowerCase().indexOf(_schemeSearch)!==-1; });
+  if (_schemeFilter==='active')   list = list.filter(function(s){ return s.status==='active'; });
+  if (_schemeFilter==='matured')  list = list.filter(function(s){ return s.status==='matured'; });
+  if (_schemeFilter==='redeemed') list = list.filter(function(s){ return s.status==='redeemed'; });
+  if (_schemeFilter==='due')      list = list.filter(function(s){ return s.status==='active' && (s.paid_months||0)<12; });
+
+  var active  = S.schemes.filter(function(s){return s.status==='active';});
+  var monthly = active.reduce(function(s,sc){return s+(parseFloat(sc.monthly_amount)||0);},0);
+  var total   = S.schemes.reduce(function(s,sc){return s+(parseFloat(sc.monthly_amount)||0)*(parseInt(sc.paid_months)||0);},0);
+
+  document.getElementById('sc-stats').innerHTML = [
+    ['gold','Total Schemes', S.schemes.length, ''],
+    ['green','Active', active.length, ''],
+    ['blue','Monthly Collection', rs(monthly), 'Expected'],
+    ['purple','Total Collected', rs(total), 'All schemes'],
+  ].map(function(s){ return '<div class="stat '+s[0]+'" style="margin-bottom:0"><div class="stat-lbl">'+s[1]+'</div><div class="stat-val">'+s[2]+'</div><div class="stat-sub">'+s[3]+'</div></div>'; }).join('');
+
+  document.getElementById('sc-body').innerHTML = list.map(function(s,i){
+    var paid    = (parseFloat(s.monthly_amount)||0)*(parseInt(s.paid_months)||0);
+    var dur     = s.duration_months||12;
+    var prog    = Math.round((s.paid_months||0)/dur*100);
+    var started = dt(s.start_date);
+    var stCls   = s.status==='active'?'tgn':s.status==='matured'?'tg':'tdm';
+    var ph      = (s.phone||'').replace(/[^0-9]/g,'');
+    return '<tr onclick="editScheme(\''+s.scheme_id+'\')">' +
+      '<td style="color:var(--dim)">' + (i+1) + '</td>' +
+      '<td style="font-family:monospace;font-size:10px;color:var(--dim)">' + (s.scheme_id||'').toUpperCase() + '</td>' +
+      '<td><b>' + (s.name||s.phone||'—') + '</b><br><span style="font-size:10px;color:var(--dim)">' + (s.phone||'') + '</span></td>' +
+      '<td style="color:var(--gold)">' + rs(s.monthly_amount) + '</td>' +
+      '<td>' + (s.paid_months||0) + ' / ' + dur + '</td>' +
+      '<td>' + rs(paid) + '</td>' +
+      '<td style="color:var(--green)">' + rs(s.monthly_amount) + ' FREE</td>' +
+      '<td><span class="tag '+stCls+'">' + (s.status||'active') + '</span></td>' +
+      '<td style="color:var(--dim)">' + started + '</td>' +
+      '<td style="min-width:80px"><div style="background:var(--bg4);border-radius:4px;height:4px"><div style="background:linear-gradient(90deg,var(--gold),var(--gold-l));height:4px;border-radius:4px;width:'+prog+'%"></div></div><div style="font-size:9px;color:var(--dim);margin-top:2px">'+prog+'%</div></td>' +
+      '<td onclick="event.stopPropagation()"><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-o" style="padding:4px 8px;font-size:10px" onclick="editScheme(\''+s.scheme_id+'\')">Edit</button>' +
+        '<a href="https://wa.me/'+ph+'" target="_blank" class="btn btn-gn" style="padding:4px 8px;font-size:10px">WA</a>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan=11 class="empty">No schemes found</td></tr>';
+}
+
+function editScheme(id) {
+  var s = S.schemes.find(function(x){ return x.scheme_id===id; });
+  if (!s) return;
+  S.currentScheme = s;
+  document.getElementById('sch-modal-title').innerHTML = 'Edit Scheme: '+id.toUpperCase()+' <button class="mclose" onclick="closeM(\'scheme-modal\')">✕</button>';
+  document.getElementById('sch-modal-body').innerHTML =
+    '<div class="ff"><label>Monthly Amount</label><input class="inp" id="se-amt" type="number" value="'+(s.monthly_amount||0)+'"/></div>' +
+    '<div class="ff"><label>Months Paid</label><input class="inp" id="se-paid" type="number" value="'+(s.paid_months||0)+'"/></div>' +
+    '<div class="ff"><label>Status</label><select class="inp" id="se-status"><option '+(s.status==="active"?"selected":"")+'>active</option><option '+(s.status==="matured"?"selected":"")+'>matured</option><option '+(s.status==="redeemed"?"selected":"")+'>redeemed</option></select></div>' +
+    '<div class="ff"><label>Duration (months)</label><input class="inp" id="se-dur" type="number" value="'+(s.duration_months||12)+'"/></div>';
+  document.getElementById('sch-del-btn').onclick = function(){ deleteSchemeConfirm(id); };
+  document.getElementById('scheme-modal').classList.add('on');
+}
+
+async function saveScheme() {
+  if (!S.currentScheme) return;
+  var p = { scheme_id:S.currentScheme.scheme_id, monthly_amount:parseFloat(document.getElementById('se-amt').value)||0,
+    paid_months:parseInt(document.getElementById('se-paid').value)||0, status:document.getElementById('se-status').value,
+    duration_months:parseInt(document.getElementById('se-dur').value)||12 };
+  var r = await fetch('/admin/customer/scheme', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
+  var j = await r.json();
+  if (j.success) { toast('Scheme updated'); closeM('scheme-modal'); await loadAll(); renderSchemes(); }
+}
+
+async function deleteSchemeConfirm(id) {
+  if (!confirm('Delete scheme permanently?')) return;
+  var r = await fetch('/admin/customer/scheme/' + id, { method:'DELETE' });
+  var j = await r.json();
+  if (j.success) { toast('Scheme deleted'); closeM('scheme-modal'); await loadAll(); renderSchemes(); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CATALOGUE
+// ══════════════════════════════════════════════════════════════════════════════
+function renderCatalogue() {
+  document.getElementById('cat-body').innerHTML = S.catalogue.length ? S.catalogue.map(function(item){
+    return '<tr><td>' + (item.image?'<img src="'+item.image+'" style="width:42px;height:42px;object-fit:cover;border-radius:6px">':'—') + '</td>' +
+      '<td><b>'+(item.name||'—')+'</b></td>' +
+      '<td><span class="tag tg">'+(item.category||'—')+'</span></td>' +
+      '<td>'+(item.weight?item.weight+'g':'—')+'</td>' +
+      '<td>'+(item.metal||'Gold')+' '+(item.purity||'')+'</td>' +
+      '<td style="color:var(--gold)">'+rs(item.price||0)+'</td>' +
+      '<td><span class="tag '+(item.available?'tgn':'trd')+'">'+(item.available?'In Stock':'Sold')+'</span></td>' +
+    '</tr>';
+  }).join('') : '<tr><td colspan=7 class="empty">No items. <a href="/catalogue-admin.html" style="color:var(--gold)">Add items →</a></td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RATES
+// ══════════════════════════════════════════════════════════════════════════════
+function renderRates() {
+  var r = S.rates;
+  function rf(key, label) {
+    return '<div class="ff"><label>'+label+'</label><input class="inp" id="rt-'+key+'" type="number" value="'+(r[key]||0)+'" step="1"/></div>';
+  }
+  document.getElementById('rates-gold').innerHTML =
+    rf('gold_24k','24K Gold / gram') + rf('gold_22k','22K Gold / gram') + rf('gold_18k','18K Gold / gram') + rf('gold_14k','14K Gold / gram');
+  document.getElementById('rates-other').innerHTML =
+    rf('silver','Silver / gram') + rf('platinum','Platinum / gram') + rf('diamond','Diamond / carat') + rf('stone','Coloured Stone / ct');
+  document.getElementById('rates-making').innerHTML =
+    '<div class="ff"><label>Plain / Chain (%)</label><input class="inp" id="rt-making_chain" type="number" value="'+(r.making_chain||5)+'" step="0.5"/></div>' +
+    '<div class="ff"><label>Ring (%)</label><input class="inp" id="rt-making_ring" type="number" value="'+(r.making_ring||8)+'" step="0.5"/></div>' +
+    '<div class="ff"><label>Necklace (%)</label><input class="inp" id="rt-making_necklace" type="number" value="'+(r.making_necklace||10)+'" step="0.5"/></div>' +
+    '<div class="ff"><label>Temple / Antique (%)</label><input class="inp" id="rt-making_temple" type="number" value="'+(r.making_temple||12)+'" step="0.5"/></div>';
+}
+
+async function saveRates() {
+  var keys = ['gold_24k','gold_22k','gold_18k','gold_14k','silver','platinum','diamond','stone','making_chain','making_ring','making_necklace','making_temple'];
+  var rates = {};
+  keys.forEach(function(k){ var el=document.getElementById('rt-'+k); if(el) rates[k]=parseFloat(el.value)||0; });
+  var r = await fetch('/admin/rates', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(rates) });
+  var j = await r.json();
+  if (j.success) { toast('Rates saved successfully'); S.rates = j.rates||rates; }
+  else toast('Error saving rates');
+}
+
+function resetRates() {
+  if (!confirm('Reset all rates to default values?')) return;
+  ['gold_24k','gold_22k','gold_18k','gold_14k'].forEach(function(k,i){ var el=document.getElementById('rt-'+k); if(el) el.value=[9850,9150,7500,6100][i]; });
+  toast('Rates reset — click Save to apply');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECURITY
+// ══════════════════════════════════════════════════════════════════════════════
+function renderSecurity() {
+  var events = JSON.parse(localStorage.getItem('adm_events')||'[]');
+  var bad    = events.filter(function(e){return e.type==='bad';}).length;
+  var last   = localStorage.getItem('adm_last_login');
+
+  document.getElementById('sec-attempts').textContent = events.length;
+  document.getElementById('sec-blocked').textContent  = bad;
+  document.getElementById('sec-last').textContent     = last ? new Date(last).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+
+  document.getElementById('sec-log').innerHTML = events.length ? events.slice(0,30).map(function(e){
+    return '<div class="sec-event">' +
+      '<span class="sec-dot ' + e.type + '"></span>' +
+      '<div><div style="font-size:12px;color:var(--white)">' + e.msg + '</div>' +
+      '<div style="font-size:10px;color:var(--dim);margin-top:1px">' + new Date(e.time).toLocaleString('en-IN') + '</div></div>' +
+    '</div>';
+  }).join('') : '<div class="empty">No security events logged</div>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WHATSAPP BLAST
+// ══════════════════════════════════════════════════════════════════════════════
+var WA_TEMPLATES = {
+  'gold-rate': 'Dear {name},\n\nGold Rate Update 🥇\n\n22K Gold: Rs.{gold_22k}/gram\n18K Gold: Rs.{gold_18k}/gram\n\nBest time to make your jewellery at Saheehisab price!\n\nCall us: +91 95094 58270\nSeervi Gems & Jewellery, Bengaluru',
+  'scheme-reminder': 'Dear {name},\n\nGold Saving Scheme Reminder 💰\n\nYour monthly payment is due.\n\nPay Rs.{scheme_amt}/month and get the 12th month FREE!\n\nContact: +91 95094 58270\nSeervi Gems & Jewellery, Bengaluru',
+  'offer': 'Dear {name},\n\n✨ Special Offer just for you!\n\nGet 50% OFF making charges on your next purchase.\n\nWe already saved you {savings} by comparing prices!\n\nVisit us or call: +91 95094 58270\nSeervi Gems & Jewellery, Bengaluru',
+  'festival': 'Dear {name},\n\nWishing you a festive season filled with joy! ✨\n\nMake your celebrations golden with authentic jewellery at fair prices.\n\nSaheehisab AI has shown you savings of {savings} so far!\n\nSeervi Gems & Jewellery\n+91 95094 58270 · Bengaluru',
+};
+
+function loadTemplate() {
+  var t = document.getElementById('wa-template').value;
+  if (WA_TEMPLATES[t]) document.getElementById('wa-msg').value = WA_TEMPLATES[t];
+  buildWAPreview();
+}
+
+function getWARecipients() {
+  var g = document.getElementById('wa-group').value;
+  var list = S.customers;
+  var now7  = Date.now() - 7*86400000;
+  var now30 = Date.now() - 30*86400000;
+  if (g==='active')   list = list.filter(function(c){ return c.last_login && new Date(c.last_login).getTime()>now7; });
+  if (g==='gold')     list = list.filter(function(c){ return parseFloat(c.gold_grams||0)>0; });
+  if (g==='scheme')   list = list.filter(function(c){ return (c.active_schemes||0)>0; });
+  if (g==='inactive') list = list.filter(function(c){ return !c.last_login || new Date(c.last_login).getTime()<now30; });
+  return list;
+}
+
+function buildWAPreview() {
+  var recipients = getWARecipients();
+  var msg = document.getElementById('wa-msg').value || '';
+  document.getElementById('wa-count').textContent = recipients.length + ' recipients selected';
+  document.getElementById('wa-recipient-count').textContent = recipients.length + ' customers';
+
+  // Preview with first recipient
+  var preview = msg;
+  if (recipients.length > 0) {
+    var c0 = recipients[0];
+    var sch = S.schemes.find(function(s){ return s.phone===c0.phone && s.status==='active'; });
+    preview = msg
+      .replace(/\{name\}/g, c0.name||'Customer')
+      .replace(/\{phone\}/g, c0.phone||'')
+      .replace(/\{city\}/g, c0.city||'')
+      .replace(/\{gold_grams\}/g, parseFloat(c0.gold_grams||0).toFixed(4)+'g')
+      .replace(/\{savings\}/g, 'Rs.'+Math.round(c0.savings_shown||0).toLocaleString('en-IN'))
+      .replace(/\{gold_22k\}/g, (S.rates.gold_22k||0).toLocaleString('en-IN'))
+      .replace(/\{gold_18k\}/g, (S.rates.gold_18k||0).toLocaleString('en-IN'))
+      .replace(/\{scheme_amt\}/g, sch ? rs(sch.monthly_amount) : 'your scheme amount');
+  }
+  document.getElementById('wa-preview').textContent = preview || 'Enter a message to preview…';
+}
+
+function initWABlast() { buildWAPreview(); }
+
+function sendWABlast() {
+  var recipients = getWARecipients();
+  var msg = document.getElementById('wa-msg').value || '';
+  if (!msg.trim()) { toast('Please enter a message'); return; }
+  if (!confirm('Send WhatsApp to ' + recipients.length + ' customers?')) return;
+
+  var linksEl = document.getElementById('wa-links');
+  linksEl.innerHTML = '<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Click each link to send:</div>';
+
+  recipients.slice(0, 50).forEach(function(c, i) {
+    var sch = S.schemes.find(function(s){ return s.phone===c.phone && s.status==='active'; });
+    var personalMsg = msg
+      .replace(/\{name\}/g, c.name||'Customer')
+      .replace(/\{phone\}/g, c.phone||'')
+      .replace(/\{city\}/g, c.city||'')
+      .replace(/\{gold_grams\}/g, parseFloat(c.gold_grams||0).toFixed(4)+'g')
+      .replace(/\{savings\}/g, 'Rs.'+Math.round(c.savings_shown||0).toLocaleString('en-IN'))
+      .replace(/\{gold_22k\}/g, (S.rates.gold_22k||0).toLocaleString('en-IN'))
+      .replace(/\{gold_18k\}/g, (S.rates.gold_18k||0).toLocaleString('en-IN'))
+      .replace(/\{scheme_amt\}/g, sch ? rs(sch.monthly_amount) : '');
+
+    var ph = (c.phone||'').replace(/[^0-9]/g,'');
+    linksEl.innerHTML += '<a href="https://wa.me/'+ph+'?text='+encodeURIComponent(personalMsg)+'" target="_blank" style="display:block;padding:6px 12px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);border-radius:6px;color:var(--green);text-decoration:none;font-size:11px;margin-bottom:5px">💬 Send to '+(c.name||c.phone)+'</a>';
+  });
+
+  if (recipients.length > 50) {
+    linksEl.innerHTML += '<div style="font-size:11px;color:var(--dim);margin-top:6px">Showing first 50 of '+recipients.length+' recipients</div>';
+  }
+  toast('WhatsApp links generated!');
+}
+
+function copyWAList() {
+  var recipients = getWARecipients();
+  var phones = recipients.map(function(c){ return (c.phone||'').replace(/[^0-9]/g,''); }).filter(Boolean);
+  navigator.clipboard.writeText(phones.join('\n')).then(function(){ toast('Phone numbers copied!'); }).catch(function(){ toast('Copy failed'); });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LEAD DETAIL MODAL
+// ══════════════════════════════════════════════════════════════════════════════
+function showLeadById(el) {
+  var id = el.getAttribute('data-lid');
+  showLead(id);
+}
+
+function showLead(id) {
+  var l = S.leads.find(function(x){ return x.lead_id===id || x.timestamp===id; });
+  if (!l) return;
+  var sav = parseFloat(l.estimated_savings)||0;
+  function row(label, val, color) {
+    return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:12px"><span style="color:var(--dim)">'+label+'</span><span style="color:'+(color||'var(--white)')+'">'+val+'</span></div>';
+  }
+  document.getElementById('lead-modal-body').innerHTML =
+    '<div style="display:flex;gap:12px;margin-bottom:14px">' +
+      (l.image_url ? '<img src="'+l.image_url+'" style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0">' : '') +
+      '<div style="flex:1"><div style="font-family:var(--font-d);font-size:18px;color:var(--white);margin-bottom:3px">'+(l.product_name||l.item||'Product')+'</div>' +
+      '<div style="font-size:11px;color:var(--dim)">'+dtTime(l.timestamp)+' · '+(l.type||'url').toUpperCase()+' · '+(l.jewellery_type||'Jewellery')+'</div>' +
+      (l.source_url ? '<a href="'+l.source_url+'" target="_blank" style="font-size:11px;color:var(--gold)">View Product ↗</a>' : '') +
+      '</div></div>' +
+    row('Metal / Purity', (l.metal||'Gold')+' '+(l.purity||'')) +
+    row('Gold Weight', l.gold_weight ? l.gold_weight+'g' : '—') +
+    row('Store Price', l.website_price ? rs(l.website_price) : '—') +
+    row('Our Price', l.saheehisab_price ? rs(l.saheehisab_price) : '—', 'var(--gold)') +
+    (sav>0 ? row('Customer Savings', '+'+rs(sav), 'var(--green)') : '') +
+    row('Customer', (l.name||l.phone||'Guest')) +
+    row('Device / Browser', l.client ? (l.client.device+' / '+l.client.browser) : '—') +
+    row('IP Address', l.client ? l.client.ip : '—') +
+    (l.source_url ? '<div style="margin-top:10px"><a href="'+l.source_url+'" target="_blank" class="btn btn-o" style="font-size:11px">View Source URL ↗</a></div>' : '');
+  document.getElementById('lead-modal').classList.add('on');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EXPORTS
+// ══════════════════════════════════════════════════════════════════════════════
+function exportCustCSV() {
+  var h = ['Name','Phone','Email','City','Gold(g)','Analyses','Savings','Member Since'];
+  var rows = S.customers.map(function(c){ return [c.name||'',c.phone||'',c.email||'',c.city||'',parseFloat(c.gold_grams||0).toFixed(4),c.analyses_count||0,Math.round(c.savings_shown||0),dt(c.member_since)].join(','); });
+  dlCSV([h.join(',')].concat(rows).join('\n'),'customers.csv');
+}
+function exportLeadsCSV() {
+  var h = ['Date','Type','Product','Category','Store Price','Our Price','Savings','Customer','Phone'];
+  var rows = S.leads.map(function(l){ return [dtTime(l.timestamp),l.type||'',l.product_name||'',l.jewellery_type||'',l.website_price||'',l.saheehisab_price||'',l.estimated_savings||'',l.name||'',l.phone||''].join(','); });
+  dlCSV([h.join(',')].concat(rows).join('\n'),'leads.csv');
+}
+function exportSchemes() {
+  var h = ['Scheme ID','Customer','Phone','Monthly','Paid Months','Total Paid','Status','Started'];
+  var rows = S.schemes.map(function(s){ return [s.scheme_id||'',s.name||'',s.phone||'',s.monthly_amount||0,s.paid_months||0,(s.monthly_amount||0)*(s.paid_months||0),s.status||'active',dt(s.start_date)].join(','); });
+  dlCSV([h.join(',')].concat(rows).join('\n'),'schemes.csv');
+}
+function exportGold() {
+  var h = ['Name','Phone','Gold(g)','Invested','Portfolio Value'];
+  var rows = S.goldUsers.map(function(u){ return [u.name||'',u.phone||'',parseFloat(u.gold_grams||0).toFixed(4),Math.round(u.total_invested||0),Math.round(parseFloat(u.gold_grams||0)*S.goldRate24k)].join(','); });
+  dlCSV([h.join(',')].concat(rows).join('\n'),'digital-gold.csv');
+}
+function dlCSV(csv, name) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'saheehisab-' + name;
+  a.click();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════════════════
+function closeM(id) { document.getElementById(id).classList.remove('on'); }
+document.querySelectorAll('.modal-bg').forEach(function(m){
+  m.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('on'); });
+});
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// Prevent inspect/devtools in production (basic deterrent)
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].indexOf(e.key) !== -1)) {
+    e.preventDefault();
+    return false;
+  }
+});
+// Disable right click on admin page
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+</script>
+</body>
+</html>

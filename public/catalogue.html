@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  var token    = localStorage.getItem('sh_token');
+  var customer = localStorage.getItem('sh_customer');
+  if (!token || !customer) {
+    // Not logged in — go to login (only once, no loop)
+    if (window.location.pathname !== '/login.html') {
+      window.location.replace('/login.html');
+    }
+  }
+})();
+</script>
+
+<meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saheehisab — Jewellery Catalogue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--black-4:#242424;
+      --gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;
+      --white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;
+      --font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    a{text-decoration:none}
+
+    /* NAV */
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(12px)}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}
+    .nav-links{display:flex;gap:8px;align-items:center}
+    .nav-link{font-size:12px;color:var(--white-dim);border:1px solid rgba(201,168,76,.2);padding:7px 13px;border-radius:var(--r);transition:.2s}
+    .nav-link:hover,.nav-link.active{color:var(--gold);border-color:var(--gold);background:var(--gold-bg)}
+    .nav-store-mode{padding:8px 16px;background:var(--green);color:#000;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+    .nav-store-mode:hover{background:#3d9960}
+    .nav-store-mode.active{background:var(--red);color:#fff}
+
+    /* HERO */
+    .hero{padding:36px 20px 28px;text-align:center;background:linear-gradient(180deg,var(--black-2) 0%,var(--black) 100%);border-bottom:1px solid rgba(201,168,76,.1)}
+    .hero h1{font-family:var(--font-d);font-size:clamp(28px,5vw,44px);font-weight:600;color:var(--white);margin-bottom:8px}
+    .hero h1 em{color:var(--gold);font-style:italic}
+    .hero p{font-size:14px;color:var(--white-dim);max-width:520px;margin:0 auto 20px;line-height:1.6}
+    .store-mode-banner{background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.3);border-radius:var(--r);padding:12px 20px;max-width:520px;margin:0 auto;font-size:13px;color:var(--green);display:none}
+    .store-mode-banner.visible{display:block}
+
+    /* LOGIN GATE */
+    .login-gate{max-width:400px;margin:60px auto;padding:0 20px}
+    .login-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:32px}
+    .login-card h2{font-family:var(--font-d);font-size:24px;color:var(--white);margin-bottom:6px}
+    .login-card p{font-size:13px;color:var(--white-dim);margin-bottom:24px}
+    .lf{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .lf label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .lf input{padding:12px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none;transition:.2s}
+    .lf input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+    .btn-gold{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.3)}
+    .btn-gold:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .otp-hint{font-size:11px;color:var(--white-dim);text-align:center;margin-top:10px;opacity:.7}
+
+    /* MAIN CONTENT */
+    .content{max-width:1200px;margin:0 auto;padding:28px 20px 80px;display:none}
+    .content.visible{display:block}
+
+    /* SEARCH & FILTER BAR */
+    .filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+    .search-box{flex:1;min-width:200px;padding:10px 16px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:13px;outline:none;transition:.2s}
+    .search-box:focus{border-color:var(--gold)}
+    .search-box::placeholder{color:var(--white-dim);opacity:.5}
+    .type-filters{display:flex;gap:6px;flex-wrap:wrap}
+    .type-btn{padding:7px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.15);border-radius:100px;color:var(--white-dim);font-size:12px;font-weight:500;cursor:pointer;transition:.2s;white-space:nowrap}
+    .type-btn:hover{border-color:var(--gold);color:var(--gold)}
+    .type-btn.active{background:var(--gold-bg);border-color:var(--gold);color:var(--gold)}
+
+    /* PRODUCT GRID */
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:32px}
+    .product-card{background:var(--black-2);border:1px solid rgba(201,168,76,.12);border-radius:14px;overflow:hidden;transition:.25s;cursor:pointer}
+    .product-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+    .product-card-img{width:100%;height:200px;object-fit:cover;background:var(--black-3);display:block}
+    .product-card-img-placeholder{width:100%;height:200px;background:var(--black-3);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--gold-dim);opacity:.3}
+    .product-card-body{padding:16px}
+    .product-type-tag{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px}
+    .product-name{font-family:var(--font-d);font-size:18px;font-weight:600;color:var(--white);margin-bottom:8px;line-height:1.2}
+    .product-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .pchip{padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600;border:1px solid}
+    .pchip-making{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3);color:var(--gold)}
+    .pchip-purity{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--white-dim)}
+    .pchip-weight{background:rgba(91,155,213,.1);border-color:rgba(91,155,213,.3);color:#5B9BD5}
+    .pchip-stone{background:rgba(76,175,125,.1);border-color:rgba(76,175,125,.3);color:var(--green)}
+    .product-desc{font-size:12px;color:var(--white-dim);line-height:1.5;margin-bottom:12px}
+    .btn-get-quote{width:100%;padding:10px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);color:var(--gold);font-family:var(--font-b);font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+    .btn-get-quote:hover{background:rgba(201,168,76,.15)}
+    .no-products{text-align:center;padding:60px 20px;color:var(--white-dim)}
+    .no-products .np-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+
+    /* ESTIMATE MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)}
+    .modal-overlay.hidden{display:none}
+    .modal{background:var(--black-2);border:1px solid rgba(201,168,76,.25);border-radius:20px;width:100%;max-width:520px;margin:auto;padding:28px;position:relative}
+    .modal-close-btn{position:absolute;top:16px;right:16px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--white-dim);font-size:14px;transition:.2s}
+    .modal-close-btn:hover{color:var(--red);border-color:var(--red)}
+    .modal-product-ref{display:flex;align-items:center;gap:12px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:12px;margin-bottom:20px}
+    .modal-product-ref img{width:50px;height:50px;object-fit:cover;border-radius:6px}
+    .modal-product-ref-info .ref-type{font-size:10px;color:var(--gold-dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    .modal-product-ref-info .ref-name{font-size:14px;font-weight:600;color:var(--white)}
+    .modal-product-ref-info .ref-making{font-size:12px;color:var(--gold)}
+    .modal h3{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:4px}
+    .modal p.msub{font-size:12px;color:var(--white-dim);margin-bottom:20px}
+    .mf{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .mf label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .mf input,.mf select,.mf textarea{padding:10px 12px;background:var(--black-3);border:1px solid rgba(201,168,76,.18);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:13px;outline:none;transition:.2s;width:100%}
+    .mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold);background:var(--black-4)}
+    .mf select option{background:var(--black-3)}
+    .mf textarea{resize:vertical;min-height:60px}
+    .mform-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .mform-grid .mf{margin-bottom:0}
+    .result-box{background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:16px;margin:16px 0}
+    .result-box-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:12px}
+    .result-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+    .result-row:last-child{border-bottom:none;padding-top:10px;font-weight:600;font-size:14px}
+    .result-label{color:var(--white-dim)}
+    .result-value{color:var(--white)}
+    .result-value.gold{color:var(--gold)}
+    .result-value.green{color:var(--green)}
+    .savings-highlight{background:linear-gradient(135deg,var(--gold-bg),#241E00);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);padding:14px;text-align:center;margin:12px 0}
+    .savings-highlight .sh-label{font-size:11px;color:var(--gold-dim);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+    .savings-highlight .sh-amount{font-family:var(--font-d);font-size:32px;color:var(--gold);font-weight:600}
+    .btn-whatsapp{width:100%;padding:13px;background:#25D366;color:#000;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
+    .btn-whatsapp:hover{background:#1ebe5a;transform:translateY(-1px)}
+    .btn-outline{width:100%;padding:11px;background:transparent;color:var(--white-dim);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);font-family:var(--font-b);font-size:13px;cursor:pointer;transition:.2s}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+    .stone-add-row{display:grid;grid-template-columns:1.5fr 0.8fr 0.7fr auto;gap:6px;align-items:center;margin-bottom:6px}
+    .stone-add-row input,.stone-add-row select{padding:8px 10px;background:var(--black-4);border:1px solid rgba(201,168,76,.15);border-radius:6px;color:var(--white);font-family:var(--font-b);font-size:12px;outline:none}
+    .btn-stone-del{background:none;border:1px solid rgba(224,80,80,.3);border-radius:6px;color:var(--red);width:28px;height:28px;cursor:pointer;font-size:12px}
+    .btn-add-stone-sm{padding:5px 12px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:100px;color:var(--gold);font-size:11px;font-weight:600;cursor:pointer;transition:.2s;margin-bottom:12px}
+    .section-divider{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.1)}
+
+    /* PRODUCT DETAIL MODAL */
+    .detail-images{display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px}
+    .detail-images img{height:160px;width:160px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:.2s}
+    .detail-images img.active-img{border-color:var(--gold)}
+    .detail-main-img{width:100%;height:240px;object-fit:cover;border-radius:var(--r);margin-bottom:12px}
+
+    .hidden{display:none!important}
+    @media(max-width:600px){
+      .products-grid{grid-template-columns:1fr 1fr}
+      .mform-grid{grid-template-columns:1fr}
+      .stone-add-row{grid-template-columns:1fr 0.8fr auto}
+      .nav-links .nav-link:not(.nav-store-mode):not(:last-child){display:none}
+    }
+    @media(max-width:380px){.products-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em></div>
+  <div class="nav-links">
+    <a href="/" class="nav-link">🔍 Price Check</a>
+    <a href="/digital-gold.html" class="nav-link">🥇 Gold</a>
+    <a href="/saving-scheme.html" class="nav-link">💰 Scheme</a>
+    <button class="nav-store-mode" id="store-mode-btn" onclick="toggleStoreMode()">🏪 I'm at a Store</button>
+    <a href="/login.html?profile=1" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Jewellery <em>Catalogue</em></h1>
+  <p>Browse our collection by type. At a store? Find the similar product, fill the price they quoted — we'll show you our best price instantly.</p>
+  <div class="store-mode-banner" id="store-mode-banner">
+    🏪 <strong>Store Mode ON</strong> — Browse categories, find what you're looking at, and tap "Get Our Price" to compare instantly. Use discreetly.
+  </div>
+</div>
+
+<!-- LOGIN GATE -->
+<div class="login-gate" id="login-gate">
+  <div class="login-card">
+    <h2>Sign in to Browse</h2>
+    <p>Enter your phone to access our full jewellery catalogue and pricing tools</p>
+    <div class="lf">
+      <label>Phone Number</label>
+      <input type="tel" id="gate-phone" placeholder="+91 98765 43210" />
+    </div>
+    <div class="lf hidden" id="gate-otp-field">
+      <label>Enter OTP</label>
+      <input type="text" id="gate-otp" placeholder="6-digit OTP" maxlength="6" />
+    </div>
+    <button class="btn-gold" id="gate-btn" onclick="gateLogin()">Send OTP →</button>
+    <p class="otp-hint" id="gate-hint">Free access · No spam · OTP expires in 10 minutes</p>
+    <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--white-dim)">
+      Don't have an account? <a href="/digital-gold.html" style="color:var(--gold)">Join Digital Gold →</a>
+    </p>
+  </div>
+</div>
+
+<!-- MAIN CATALOGUE -->
+<div class="content" id="catalogue-content">
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <input type="text" class="search-box" id="search-box" placeholder="🔍  Search by name, type, stone…" oninput="filterProducts()" />
+    <div class="type-filters" id="type-filters">
+      <button class="type-btn active" data-type="" onclick="setTypeFilter(this,'')">All</button>
+      <button class="type-btn" data-type="chain"    onclick="setTypeFilter(this,'chain')">⛓ Chain</button>
+      <button class="type-btn" data-type="ring"     onclick="setTypeFilter(this,'ring')">💍 Ring</button>
+      <button class="type-btn" data-type="necklace" onclick="setTypeFilter(this,'necklace')">📿 Necklace</button>
+      <button class="type-btn" data-type="earrings" onclick="setTypeFilter(this,'earrings')">Earrings</button>
+      <button class="type-btn" data-type="bangle"   onclick="setTypeFilter(this,'bangle')">Bangle</button>
+      <button class="type-btn" data-type="pendant"  onclick="setTypeFilter(this,'pendant')">Pendant</button>
+      <button class="type-btn" data-type="bracelet" onclick="setTypeFilter(this,'bracelet')">Bracelet</button>
+      <button class="type-btn" data-type="jhumka"   onclick="setTypeFilter(this,'jhumka')">Jhumka</button>
+      <button class="type-btn" data-type="temple"   onclick="setTypeFilter(this,'temple')">🛕 Temple</button>
+      <button class="type-btn" data-type="kundan"   onclick="setTypeFilter(this,'kundan')">Kundan</button>
+      <button class="type-btn" data-type="anklet"   onclick="setTypeFilter(this,'anklet')">Anklet</button>
+      <button class="type-btn" data-type="plain"    onclick="setTypeFilter(this,'plain')">Plain</button>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="products-grid" id="products-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--white-dim)">Loading catalogue…</div>
+  </div>
+
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal-overlay hidden" id="detail-modal">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeModal('detail-modal')">✕</button>
+    <div id="detail-images-wrap" class="detail-images"></div>
+    <img id="detail-main-img" class="detail-main-img" src="" alt="" />
+    <div class="product-type-tag" id="detail-type"></div>
+    <div style="font-family:var(--font-d);font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px" id="detail-name"></div>
+    <div class="product-chips" id="detail-chips"></div>
+    <p style="font-size:13px;color:var(--white-dim);line-height:1.6;margin-bottom:16px" id="detail-desc"></p>
+    <div style="background:var(--black-3);border-radius:var(--r);padding:14px;margin-bottom:16px" id="detail-info"></div>
+    <button class="btn-gold" onclick="openEstimateFromDetail()">Get Our Price for This Type →</button>
+  </div>
+</div>
+
+<!-- ESTIMATE MODAL -->
+<div class="modal-overlay hidden" id="estimate-modal">
+  <div class="modal">
+    <button class="modal-close-btn" onclick="closeModal('estimate-modal')">✕</button>
+
+    <!-- Product reference -->
+    <div class="modal-product-ref" id="est-product-ref">
+      <div class="modal-product-ref-info">
+        <div class="ref-type" id="est-ref-type">Jewellery</div>
+        <div class="ref-name" id="est-ref-name">Similar Product</div>
+        <div class="ref-making" id="est-ref-making">Making: —%</div>
+      </div>
+    </div>
+
+    <h3>Get Our Price</h3>
+    <p class="msub">Fill in the details the store told you — we'll calculate Saheehisab's price instantly</p>
+
+    <!-- Step 1: Details -->
+    <div id="est-step-1">
+      <div class="section-divider">Your Details</div>
+      <div class="mform-grid">
+        <div class="mf"><label>Your Name</label><input type="text" id="est-name" placeholder="Full name" /></div>
+        <div class="mf"><label>Phone Number</label><input type="tel" id="est-phone" placeholder="+91 phone" /></div>
+      </div>
+      <div class="mf"><label>Store Name (where you are now)</label><input type="text" id="est-store" placeholder="e.g. XYZ Jewellers, MG Road" /></div>
+
+      <div class="section-divider">Product Details from Store</div>
+      <div class="mform-grid">
+        <div class="mf">
+          <label>Jewellery Type</label>
+          <select id="est-type">
+            <option value="chain">Chain</option><option value="ring">Ring</option>
+            <option value="necklace">Necklace</option><option value="earrings">Earrings</option>
+            <option value="bangle">Bangle</option><option value="pendant">Pendant</option>
+            <option value="bracelet">Bracelet</option><option value="jhumka">Jhumka</option>
+            <option value="anklet">Anklet</option><option value="temple">Temple Jewellery</option>
+            <option value="kundan">Kundan</option><option value="plain">Plain Gold</option>
+          </select>
+        </div>
+        <div class="mf">
+          <label>Purity</label>
+          <select id="est-purity">
+            <option value="22K">22 Karat</option><option value="18K">18 Karat</option>
+            <option value="24K">24 Karat</option><option value="14K">14 Karat</option>
+          </select>
+        </div>
+      </div>
+      <div class="mform-grid">
+        <div class="mf"><label>Gold Weight (grams)</label><input type="number" id="est-weight" placeholder="e.g. 8.5" min="0" step="0.01" oninput="calcEstimate()" /></div>
+        <div class="mf"><label>Store's Total Price (₹)</label><input type="number" id="est-store-price" placeholder="e.g. 95000" min="0" oninput="calcEstimate()" /></div>
+      </div>
+
+      <div class="section-divider">Stones (if any)</div>
+      <div id="est-stone-rows"></div>
+      <button class="btn-add-stone-sm" onclick="addEstStone()">+ Add Stone</button>
+
+      <div class="mf" style="margin-bottom:16px">
+        <label>Any other details / notes</label>
+        <textarea id="est-notes" placeholder="e.g. Has ruby stones, antique finish, size 16…"></textarea>
+      </div>
+
+      <button class="btn-gold" onclick="showEstimateResult()">Calculate Our Price →</button>
+    </div>
+
+    <!-- Step 2: Result -->
+    <div id="est-step-2" class="hidden">
+      <div class="result-box">
+        <div class="result-box-title">Price Breakdown</div>
+        <div class="result-row"><span class="result-label">Gold Rate (22K)</span><span class="result-value" id="r-gold-rate">—</span></div>
+        <div class="result-row"><span class="result-label">Gold Value</span><span class="result-value" id="r-gold-value">—</span></div>
+        <div class="result-row"><span class="result-label">Stone Value</span><span class="result-value" id="r-stone-value">—</span></div>
+        <div class="result-row"><span class="result-label">Making Charge (<span id="r-making-pct">—</span>%)</span><span class="result-value" id="r-making">—</span></div>
+        <div class="result-row"><span class="result-label">GST (3%)</span><span class="result-value" id="r-gst">—</span></div>
+        <div class="result-row"><span class="result-label">Store's Price</span><span class="result-value" id="r-store-price">—</span></div>
+        <div class="result-row"><span class="result-label">Saheehisab Price</span><span class="result-value gold" id="r-our-price">—</span></div>
+      </div>
+
+      <div class="savings-highlight">
+        <div class="sh-label">You Save with Saheehisab</div>
+        <div class="sh-amount" id="r-savings">₹0</div>
+      </div>
+
+      <button class="btn-whatsapp" onclick="sendToWhatsApp()">
+        <span style="font-size:18px">💬</span> Send to Saheehisab on WhatsApp
+      </button>
+      <button class="btn-outline" onclick="resetEstimate()">← Change Details</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+var currentUser  = null;
+var allProducts  = [];
+var currentType  = '';
+var currentSearch= '';
+var storeMode    = false;
+var selectedProduct = null;
+var currentRates = {};
+var estStoneCount = 0;
+var lastResult   = {};
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  // Check session from digital-gold login
+  var saved = localStorage.getItem('dg_user') || localStorage.getItem('cat_user');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); showCatalogue(); }
+    catch(e) { localStorage.removeItem('cat_user'); }
+  }
+  loadRates();
+  // Pre-fill phone from stored user
+  if (currentUser && document.getElementById('est-phone')) {
+    document.getElementById('est-phone').value = currentUser.phone || '';
+    document.getElementById('est-name').value  = currentUser.name  || '';
+  }
+});
+
+async function loadRates() {
+  try {
+    var res  = await fetch('/rates');
+    var json = await res.json();
+    if (json.success) currentRates = json.rates;
+  } catch(e) {}
+}
+
+// ── Login Gate ─────────────────────────────────────────────────────────────────
+var gateStep = 1;
+async function gateLogin() {
+  var phone = document.getElementById('gate-phone').value.trim();
+  var btn   = document.getElementById('gate-btn');
+
+  if (gateStep === 1) {
+    if (!phone || phone.length < 10) { alert('Enter a valid phone number'); return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    var res  = await fetch('/gold/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone }) });
+    var json = await res.json();
+    btn.disabled = false;
+    if (json.success) {
+      gateStep = 2;
+      document.getElementById('gate-otp-field').classList.remove('hidden');
+      document.getElementById('gate-hint').textContent = 'OTP sent to ' + phone + '. Demo OTP: ' + (json.demo_otp || '123456');
+      btn.textContent = 'Verify & Browse →';
+    } else { alert(json.error || 'Failed'); btn.textContent = 'Send OTP →'; }
+  } else {
+    var otp = document.getElementById('gate-otp').value.trim();
+    if (!otp) { alert('Enter OTP'); return; }
+    btn.disabled = true; btn.textContent = 'Verifying…';
+    var res2  = await fetch('/gold/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone, otp: otp }) });
+    var json2 = await res2.json();
+    btn.disabled = false; btn.textContent = 'Verify & Browse →';
+    if (json2.success) {
+      currentUser = json2.user;
+      localStorage.setItem('cat_user', JSON.stringify(currentUser));
+      showCatalogue();
+    } else { alert(json2.error || 'Invalid OTP'); }
+  }
+}
+
+function showCatalogue() {
+  document.getElementById('login-gate').classList.add('hidden');
+  document.getElementById('catalogue-content').classList.add('visible');
+  if (currentUser && document.getElementById('est-phone')) {
+    document.getElementById('est-phone').value = currentUser.phone || '';
+    document.getElementById('est-name').value  = currentUser.name  || '';
+  }
+  loadProducts();
+}
+
+// ── Products ───────────────────────────────────────────────────────────────────
+async function loadProducts() {
+  try {
+    var url  = '/catalogue?type=' + currentType + '&search=' + encodeURIComponent(currentSearch);
+    var res  = await fetch(url);
+    var json = await res.json();
+    if (json.success) { allProducts = json.products; renderProducts(json.products); }
+    else { document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--white-dim)">Failed to load catalogue</div>'; }
+  } catch(e) {
+    document.getElementById('products-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--white-dim)">No products yet. Admin can add products via <a href="/catalogue-admin.html" style="color:var(--gold)">Catalogue Admin →</a></div>';
+  }
+}
+
+function renderProducts(products) {
+  var grid = document.getElementById('products-grid');
+  if (!products.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1"><div class="no-products"><div class="np-icon">💎</div><p>No products in this category yet.</p><p style="font-size:12px;margin-top:8px">Admin can add products via <a href="/catalogue-admin.html" style="color:var(--gold)">Catalogue Admin</a></p></div></div>';
+    return;
+  }
+  grid.innerHTML = products.map(function(p) {
+    var img = p.images && p.images[0]
+      ? '<img class="product-card-img" src="' + p.images[0] + '" alt="' + p.name + '" loading="lazy" />'
+      : '<div class="product-card-img-placeholder">◆</div>';
+    var weightTxt = p.typical_weight_min && p.typical_weight_max
+      ? p.typical_weight_min + '–' + p.typical_weight_max + 'g'
+      : (p.typical_weight_min ? p.typical_weight_min + 'g+' : '');
+    return '<div class="product-card" onclick="openDetail(\'' + p.id + '\')">' +
+      img +
+      '<div class="product-card-body">' +
+        '<div class="product-type-tag">' + (p.jewellery_type||'').toUpperCase() + '</div>' +
+        '<div class="product-name">' + (p.name||'Product') + '</div>' +
+        '<div class="product-chips">' +
+          '<span class="pchip pchip-making">Making ' + p.making_percent + '%</span>' +
+          '<span class="pchip pchip-purity">' + (p.purity||'22K') + '</span>' +
+          (weightTxt ? '<span class="pchip pchip-weight">' + weightTxt + '</span>' : '') +
+          (p.stones ? '<span class="pchip pchip-stone">' + p.stones + '</span>' : '') +
+        '</div>' +
+        '<div class="product-desc">' + (p.description||'').slice(0,80) + (p.description && p.description.length > 80 ? '…' : '') + '</div>' +
+        '<button class="btn-get-quote" onclick="event.stopPropagation();openEstimate(\'' + p.id + '\')">Get Our Price →</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function setTypeFilter(btn, type) {
+  document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  currentType = type;
+  loadProducts();
+}
+
+function filterProducts() {
+  currentSearch = document.getElementById('search-box').value;
+  loadProducts();
+}
+
+// ── Product Detail ─────────────────────────────────────────────────────────────
+function openDetail(id) {
+  var p = allProducts.find(function(x) { return x.id === id; });
+  if (!p) return;
+  selectedProduct = p;
+
+  // Images
+  var imgsWrap = document.getElementById('detail-images-wrap');
+  var mainImg  = document.getElementById('detail-main-img');
+  if (p.images && p.images.length) {
+    mainImg.src = p.images[0];
+    mainImg.style.display = 'block';
+    imgsWrap.innerHTML = p.images.map(function(img, i) {
+      return '<img src="' + img + '" class="' + (i===0?'active-img':'') + '" onclick="switchDetailImg(this,\'' + img + '\')" />';
+    }).join('');
+  } else {
+    mainImg.style.display = 'none';
+    imgsWrap.innerHTML = '<div style="width:100%;height:160px;background:var(--black-3);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--gold-dim);opacity:.3">◆</div>';
+  }
+
+  document.getElementById('detail-type').textContent = (p.jewellery_type||'').toUpperCase();
+  document.getElementById('detail-name').textContent = p.name || 'Product';
+  document.getElementById('detail-desc').textContent = p.description || '';
+
+  var weightTxt = p.typical_weight_min && p.typical_weight_max
+    ? p.typical_weight_min + '–' + p.typical_weight_max + 'g'
+    : (p.typical_weight_min ? p.typical_weight_min + 'g+' : 'Varies');
+
+  document.getElementById('detail-chips').innerHTML =
+    '<span class="pchip pchip-making">Making ' + p.making_percent + '%</span>' +
+    '<span class="pchip pchip-purity">' + (p.purity||'22K') + '</span>' +
+    '<span class="pchip pchip-weight">' + weightTxt + '</span>' +
+    (p.stones ? '<span class="pchip pchip-stone">' + p.stones + '</span>' : '');
+
+  document.getElementById('detail-info').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">' +
+    '<div><span style="color:var(--white-dim)">Metal: </span><span style="color:var(--white)">' + (p.metal||'Gold') + ' ' + (p.purity||'22K') + '</span></div>' +
+    '<div><span style="color:var(--white-dim)">Making Charge: </span><span style="color:var(--gold);font-weight:600">' + p.making_percent + '%</span></div>' +
+    '<div><span style="color:var(--white-dim)">Typical Weight: </span><span style="color:var(--white)">' + weightTxt + '</span></div>' +
+    '<div><span style="color:var(--white-dim)">Stones: </span><span style="color:var(--white)">' + (p.stones||'None') + '</span></div>' +
+    '</div>';
+
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+function switchDetailImg(el, src) {
+  document.getElementById('detail-main-img').src = src;
+  document.querySelectorAll('#detail-images-wrap img').forEach(function(i){ i.classList.remove('active-img'); });
+  el.classList.add('active-img');
+}
+
+function openEstimateFromDetail() {
+  closeModal('detail-modal');
+  if (selectedProduct) openEstimate(selectedProduct.id);
+}
+
+// ── Estimate ───────────────────────────────────────────────────────────────────
+function openEstimate(id) {
+  var p = allProducts.find(function(x) { return x.id === id; });
+  selectedProduct = p || null;
+
+  // Set product reference
+  if (p) {
+    document.getElementById('est-ref-type').textContent   = (p.jewellery_type||'').toUpperCase();
+    document.getElementById('est-ref-name').textContent   = p.name || 'Similar Product';
+    document.getElementById('est-ref-making').textContent = 'Our Making: ' + p.making_percent + '%';
+    // Set type dropdown
+    var sel = document.getElementById('est-type');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === p.jewellery_type) { sel.selectedIndex = i; break; }
+    }
+    // Set purity
+    var pur = document.getElementById('est-purity');
+    for (var j = 0; j < pur.options.length; j++) {
+      if (pur.options[j].value === p.purity) { pur.selectedIndex = j; break; }
+    }
+  }
+
+  // Reset to step 1
+  document.getElementById('est-step-1').classList.remove('hidden');
+  document.getElementById('est-step-2').classList.add('hidden');
+  document.getElementById('est-stone-rows').innerHTML = '';
+  estStoneCount = 0;
+
+  // Pre-fill user details
+  if (currentUser) {
+    document.getElementById('est-phone').value = currentUser.phone || '';
+    document.getElementById('est-name').value  = currentUser.name  || '';
+  }
+
+  document.getElementById('estimate-modal').classList.remove('hidden');
+}
+
+function addEstStone() {
+  estStoneCount++;
+  var id  = estStoneCount;
+  var row = document.createElement('div');
+  row.className = 'stone-add-row';
+  row.id        = 'est-stone-' + id;
+  var types = ['Diamond','Polki','Ruby','Emerald','Sapphire','Pearl','Coral','Turquoise','Opal','Amethyst','Topaz','Garnet','Other'];
+  row.innerHTML =
+    '<select id="est-st-type-' + id + '"><option value="">Stone type</option>' + types.map(function(t){ return '<option value="' + t + '">' + t + '</option>'; }).join('') + '</select>' +
+    '<input type="number" id="est-st-wt-' + id + '" placeholder="Weight" min="0" step="0.01" oninput="calcEstimate()" />' +
+    '<select id="est-st-unit-' + id + '"><option value="carat">carat</option><option value="gram">gram</option></select>' +
+    '<button class="btn-stone-del" onclick="document.getElementById(\'est-stone-' + id + '\').remove();calcEstimate()">✕</button>';
+  document.getElementById('est-stone-rows').appendChild(row);
+}
+
+function calcEstimate() {
+  // Called on input change — just validates inputs, actual calc on submit
+}
+
+function showEstimateResult() {
+  var name       = document.getElementById('est-name').value.trim();
+  var phone      = document.getElementById('est-phone').value.trim();
+  var storeNm    = document.getElementById('est-store').value.trim();
+  var type       = document.getElementById('est-type').value;
+  var purity     = document.getElementById('est-purity').value;
+  var weight     = parseFloat(document.getElementById('est-weight').value) || 0;
+  var storePrice = parseFloat(document.getElementById('est-store-price').value) || 0;
+
+  if (!weight) { alert('Please enter the gold weight in grams'); return; }
+
+  var rates = currentRates;
+  var goldRate = type === '24K' ? (rates.gold_24k||9850) : type === '18K' ? (rates.gold_18k||7390) : type === '14K' ? (rates.gold_14k||5700) : (rates.gold_22k||9150);
+
+  // Making % — use selected product's making if available, else our standard rates
+  var makingPct = selectedProduct ? selectedProduct.making_percent : getMakingPctForType(type, rates);
+
+  // Collect stones
+  var totalStoneVal = 0;
+  var stonesDesc    = [];
+  document.querySelectorAll('.stone-add-row').forEach(function(row) {
+    var id  = row.id.replace('est-stone-','');
+    var st  = document.getElementById('est-st-type-' + id);
+    var wt  = document.getElementById('est-st-wt-'   + id);
+    var un  = document.getElementById('est-st-unit-'  + id);
+    if (!st || !wt) return;
+    var stName = st.value;
+    var stWt   = parseFloat(wt.value) || 0;
+    var stUnit = un ? un.value : 'carat';
+    if (stWt > 0 && stName) {
+      var stRate = getStoneRateLocal(stName, rates);
+      var stVal  = stWt * stRate;
+      totalStoneVal += stVal;
+      stonesDesc.push(stName + ' ' + stWt + stUnit);
+    }
+  });
+
+  var goldValue    = weight * goldRate;
+  var makingCharge = goldValue * (makingPct / 100);
+  var gst          = (goldValue + makingCharge) * 0.03;
+  var ourPrice     = goldValue + totalStoneVal + makingCharge + gst;
+  var savings      = storePrice > 0 ? storePrice - ourPrice : 0;
+
+  // Store for WhatsApp
+  lastResult = {
+    name: name, phone: phone, store: storeNm, type: type, purity: purity,
+    weight: weight, storePrice: storePrice, goldRate: goldRate,
+    goldValue: goldValue, stoneValue: totalStoneVal, makingPct: makingPct,
+    makingCharge: makingCharge, gst: gst, ourPrice: ourPrice, savings: savings,
+    stones: stonesDesc.join(', '), notes: document.getElementById('est-notes').value,
+    productRef: selectedProduct ? selectedProduct.name : '',
+  };
+
+  // Update UI
+  var fmt = function(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); };
+  document.getElementById('r-gold-rate').textContent   = fmt(goldRate) + '/g';
+  document.getElementById('r-gold-value').textContent  = fmt(goldValue);
+  document.getElementById('r-stone-value').textContent = totalStoneVal > 0 ? fmt(totalStoneVal) : '—';
+  document.getElementById('r-making-pct').textContent  = makingPct;
+  document.getElementById('r-making').textContent      = fmt(makingCharge);
+  document.getElementById('r-gst').textContent         = fmt(gst);
+  document.getElementById('r-store-price').textContent = storePrice > 0 ? fmt(storePrice) : '—';
+  document.getElementById('r-our-price').textContent   = fmt(ourPrice);
+  document.getElementById('r-savings').textContent     = savings > 0 ? 'You Save ' + fmt(savings) : savings < 0 ? 'Similar to market' : 'Enter store price to compare';
+
+  document.getElementById('est-step-1').classList.add('hidden');
+  document.getElementById('est-step-2').classList.remove('hidden');
+
+  // Auto-submit lead
+  submitEstimateLead();
+}
+
+async function submitEstimateLead() {
+  try {
+    await fetch('/catalogue/estimate/submit', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        customer_name     : lastResult.name,
+        customer_phone    : lastResult.phone,
+        store_name        : lastResult.store,
+        product_name      : lastResult.productRef || lastResult.type,
+        jewellery_type    : lastResult.type,
+        purity            : lastResult.purity,
+        gold_weight       : lastResult.weight,
+        stones            : lastResult.stones,
+        store_price       : lastResult.storePrice,
+        saheehisab_price  : Math.round(lastResult.ourPrice),
+        estimated_savings : Math.round(lastResult.savings),
+        notes             : lastResult.notes,
+      }),
+    });
+  } catch(e) {}
+}
+
+function sendToWhatsApp() {
+  var r   = lastResult;
+  var fmt = function(n) { return 'Rs.' + Math.round(n).toLocaleString('en-IN'); };
+  var msg = '*Saheehisab — Customer Price Enquiry*\n\n' +
+    'Customer: ' + (r.name || '—') + '\n' +
+    'Phone: ' + (r.phone || '—') + '\n' +
+    'Store: ' + (r.store || '—') + '\n\n' +
+    '*Product Details:*\n' +
+    'Type: ' + r.type + ' (' + r.purity + ')\n' +
+    'Gold Weight: ' + r.weight + 'g\n' +
+    (r.stones ? 'Stones: ' + r.stones + '\n' : '') +
+    (r.productRef ? 'Similar to: ' + r.productRef + '\n' : '') +
+    '\n*Pricing:*\n' +
+    'Gold Value: ' + fmt(r.goldValue) + '\n' +
+    (r.stoneValue > 0 ? 'Stone Value: ' + fmt(r.stoneValue) + '\n' : '') +
+    'Making (' + r.makingPct + '%): ' + fmt(r.makingCharge) + '\n' +
+    'GST (3%): ' + fmt(r.gst) + '\n' +
+    '*Saheehisab Price: ' + fmt(r.ourPrice) + '*\n' +
+    (r.storePrice > 0 ? 'Store quoted: ' + fmt(r.storePrice) + '\n' : '') +
+    (r.savings > 0 ? '*Savings: ' + fmt(r.savings) + '*\n' : '') +
+    (r.notes ? '\nNotes: ' + r.notes + '\n' : '') +
+    '\n_Sent via Saheehisab AI Catalogue_';
+
+  var phone = '919509458270';
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function resetEstimate() {
+  document.getElementById('est-step-1').classList.remove('hidden');
+  document.getElementById('est-step-2').classList.add('hidden');
+}
+
+// ── Store Mode ─────────────────────────────────────────────────────────────────
+function toggleStoreMode() {
+  storeMode = !storeMode;
+  var btn    = document.getElementById('store-mode-btn');
+  var banner = document.getElementById('store-mode-banner');
+  if (storeMode) {
+    btn.textContent = '✕ Exit Store Mode';
+    btn.classList.add('active');
+    banner.classList.add('visible');
+  } else {
+    btn.textContent = '🏪 I\'m at a Store';
+    btn.classList.remove('active');
+    banner.classList.remove('visible');
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function getMakingPctForType(type, rates) {
+  var map = { chain:5, ring:8, necklace:10, pendant:8, bangle:7, earrings:8, jhumka:10, temple:12, kundan:14, bracelet:8, anklet:7, plain:8 };
+  return map[type] || 8;
+}
+
+function getStoneRateLocal(name, rates) {
+  var n = (name||'').toLowerCase();
+  if (n==='diamond')   return rates.diamond   || 55000;
+  if (n==='polki')     return rates.polki     || 8000;
+  if (n==='ruby')      return rates.ruby      || 12000;
+  if (n==='emerald')   return rates.emerald   || 10000;
+  if (n==='sapphire')  return rates.sapphire  || 9000;
+  if (n==='pearl')     return rates.pearl     || 3000;
+  if (n==='coral')     return rates.coral     || 2000;
+  if (n==='turquoise') return rates.turquoise || 1500;
+  if (n==='opal')      return rates.opal      || 4000;
+  if (n==='amethyst')  return rates.amethyst  || 800;
+  if (n==='topaz')     return rates.topaz     || 1200;
+  if (n==='garnet')    return rates.garnet    || 600;
+  return rates.other_stone || 500;
+}
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e) { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// Enter key on login
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (!document.getElementById('login-gate').classList.contains('hidden')) gateLogin();
+  }
+});
+</script>
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+[
+  {
+    "phone": "9509458270",
+    "name": "vikash",
+    "email": "",
+    "gold_grams": 0.3363790186125222,
+    "total_invested": 202000,
+    "transactions": [
+      {
+        "type": "sell",
+        "grams": 1,
+        "amount": 14850,
+        "rate": 15000,
+        "timestamp": "2026-06-20T06:16:40.029Z",
+        "notes": "Bank: vk@ybl"
+      },
+      {
+        "type": "redeem",
+        "grams": 2,
+        "amount": 26720,
+        "rate": 13360,
+        "timestamp": "2026-06-19T14:41:59.075Z",
+        "notes": "coin-2g-x1 · making saved ₹1336"
+      },
+      {
+        "type": "redeem",
+        "grams": 10,
+        "amount": 133600,
+        "rate": 13360,
+        "timestamp": "2026-06-19T14:41:34.675Z",
+        "notes": "Custom Order · making saved ₹6680"
+      },
+      {
+        "type": "buy",
+        "grams": 13.333333333333334,
+        "amount": 200000,
+        "rate": 15000,
+        "timestamp": "2026-06-19T14:40:41.709Z",
+        "notes": "UPI (Google Pay / PhonePe / Paytm)",
+        "payment_method": "UPI (Google Pay / PhonePe / Paytm)"
+      },
+      {
+        "type": "sell",
+        "grams": 0.2,
+        "amount": 2970,
+        "rate": 15000,
+        "timestamp": "2026-06-19T14:20:19.177Z",
+        "notes": "Bank: vk@ybl"
+      },
+      {
+        "type": "buy",
+        "grams": 0.20304568527918782,
+        "amount": 2000,
+        "rate": 9850,
+        "timestamp": "2026-06-18T07:32:14.659Z",
+        "notes": "UPI (Google Pay / PhonePe / Paytm)",
+        "payment_method": "UPI (Google Pay / PhonePe / Paytm)"
+      }
+    ],
+    "referral_code": "VIKA2361",
+    "referral_code_used": "",
+    "price_alert_low": 0,
+    "price_alert_high": 0,
+    "created_at": "2026-06-18T07:31:50.589Z"
+  }
+]
