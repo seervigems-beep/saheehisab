@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  var token    = localStorage.getItem('sh_token');
+  var customer = localStorage.getItem('sh_customer');
+  if (!token || !customer) {
+    // Not logged in — go to login (only once, no loop)
+    if (window.location.pathname !== '/login.html') {
+      window.location.replace('/login.html');
+    }
+  }
+})();
+</script>
+
+<meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saheehisab — Digital Gold</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--black-4:#242424;
+      --gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;
+      --white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;
+      --font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+    /* NAV */
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(12px)}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}
+    .nav-links{display:flex;gap:8px}
+    .nav-link{font-size:12px;color:var(--white-dim);text-decoration:none;border:1px solid rgba(201,168,76,.2);padding:7px 14px;border-radius:var(--r);transition:.2s}
+    .nav-link:hover,.nav-link.active{color:var(--gold);border-color:var(--gold);background:var(--gold-bg)}
+
+    /* HERO */
+    .hero{background:linear-gradient(135deg,#0A0A0A 0%,#1C1608 50%,#0A0A0A 100%);padding:60px 24px 40px;text-align:center;border-bottom:1px solid rgba(201,168,76,.1)}
+    .hero-badge{display:inline-block;padding:4px 14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+    .hero h1{font-family:var(--font-d);font-size:clamp(32px,5vw,52px);font-weight:600;color:var(--white);margin-bottom:12px}
+    .hero h1 em{color:var(--gold);font-style:italic}
+    .hero p{font-size:15px;color:var(--white-dim);max-width:520px;margin:0 auto 28px;line-height:1.7}
+    .live-rate-bar{display:inline-flex;align-items:center;gap:20px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:100px;padding:10px 24px;font-size:13px}
+    .rate-item{display:flex;align-items:center;gap:8px}
+    .rate-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .rate-label{color:var(--white-dim)}
+    .rate-value{color:var(--gold);font-weight:600}
+
+    /* AUTH GATE */
+    .auth-gate{max-width:440px;margin:60px auto;padding:0 24px}
+    .auth-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:32px}
+    .auth-card h2{font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:6px}
+    .auth-card p{font-size:13px;color:var(--white-dim);margin-bottom:24px}
+    .form-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+    .form-field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .form-field input,.form-field select{padding:12px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none;transition:.2s}
+    .form-field input:focus,.form-field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+    .form-field select option{background:var(--black-3)}
+    .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.35)}
+    .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--white-dim)}
+    .auth-switch a{color:var(--gold);cursor:pointer;text-decoration:none}
+    .otp-note{font-size:11px;color:var(--white-dim);text-align:center;margin-top:12px;opacity:.7}
+
+    /* MAIN DASHBOARD */
+    .dashboard{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+    .dashboard.hidden{display:none}
+
+    /* Portfolio card */
+    .portfolio-card{background:linear-gradient(135deg,var(--gold-bg),#241E00);border:1px solid rgba(201,168,76,.35);border-radius:20px;padding:32px;margin-bottom:28px;position:relative;overflow:hidden}
+    .portfolio-card::before{content:'◆';position:absolute;right:30px;top:-10px;font-size:120px;color:rgba(201,168,76,.05);line-height:1}
+    .portfolio-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .portfolio-greeting{font-size:13px;color:var(--gold-dim);margin-bottom:4px}
+    .portfolio-name{font-family:var(--font-d);font-size:24px;color:var(--white)}
+    .portfolio-id{font-size:11px;color:var(--white-dim);margin-top:4px;font-family:monospace}
+    .referral-box{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:10px 14px;text-align:center}
+    .referral-label{font-size:10px;color:var(--gold-dim);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+    .referral-code{font-size:18px;font-weight:700;color:var(--gold);letter-spacing:.12em;cursor:pointer}
+    .referral-sub{font-size:10px;color:var(--white-dim);margin-top:2px}
+    .portfolio-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+    .p-stat{background:rgba(0,0,0,.3);border-radius:var(--r);padding:14px 16px}
+    .p-stat-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--white-dim);margin-bottom:6px}
+    .p-stat-value{font-family:var(--font-d);font-size:22px;font-weight:600;color:var(--gold)}
+    .p-stat-sub{font-size:11px;color:var(--white-dim);margin-top:2px}
+    .p-stat.green .p-stat-value{color:var(--green)}
+
+    /* Action cards */
+    .action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:28px}
+    .action-card{background:var(--black-2);border:1px solid rgba(201,168,76,.15);border-radius:16px;padding:24px;transition:.2s}
+    .action-card:hover{border-color:rgba(201,168,76,.35)}
+    .action-icon{font-size:28px;margin-bottom:12px}
+    .action-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:6px}
+    .action-desc{font-size:12px;color:var(--white-dim);margin-bottom:18px;line-height:1.5}
+    .btn-action{width:100%;padding:11px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);color:var(--gold);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+    .btn-action:hover{background:rgba(201,168,76,.15)}
+    .btn-action.green{background:rgba(76,175,125,.1);border-color:rgba(76,175,125,.3);color:var(--green)}
+    .btn-action.red{background:rgba(224,80,80,.1);border-color:rgba(224,80,80,.3);color:var(--red)}
+
+    /* Features bar */
+    .features-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:28px}
+    .feature-item{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:12px}
+    .feature-icon{font-size:24px;flex-shrink:0}
+    .feature-text{font-size:12px;color:var(--white-dim);line-height:1.4}
+    .feature-text strong{display:block;color:var(--white);margin-bottom:2px;font-size:13px}
+
+    /* Transaction history */
+    .section-title{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:16px;padding-left:12px;border-left:3px solid var(--gold)}
+    .txn-table-wrap{border:1px solid rgba(201,168,76,.15);border-radius:var(--r);overflow:hidden;margin-bottom:28px}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--black-3)}
+    th{padding:12px 16px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)}
+    td{padding:12px 16px;font-size:13px;color:var(--white);border-bottom:1px solid rgba(255,255,255,.04)}
+    tr:last-child td{border-bottom:none}
+    .txn-buy{color:var(--green)}.txn-sell{color:var(--red)}.txn-redeem{color:var(--gold)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700}
+    .badge-buy{background:rgba(76,175,125,.15);color:var(--green)}
+    .badge-sell{background:rgba(224,80,80,.15);color:var(--red)}
+    .badge-redeem{background:rgba(201,168,76,.15);color:var(--gold)}
+    .badge-reward{background:rgba(91,155,213,.15);color:#5B9BD5}
+    .empty-txn{text-align:center;padding:40px;color:var(--white-dim);font-size:13px}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+    .modal-overlay.hidden{display:none}
+    .modal{background:var(--black-2);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:32px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+    .modal h3{font-family:var(--font-d);font-size:24px;color:var(--white);margin-bottom:6px}
+    .modal p.modal-sub{font-size:13px;color:var(--white-dim);margin-bottom:24px}
+    .modal-close{float:right;background:none;border:none;color:var(--white-dim);font-size:20px;cursor:pointer;margin-top:-8px}
+    .modal-close:hover{color:var(--white)}
+    .calc-display{background:var(--black-3);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);padding:16px;margin-bottom:20px;text-align:center}
+    .calc-grams{font-family:var(--font-d);font-size:32px;color:var(--gold);font-weight:600}
+    .calc-label{font-size:12px;color:var(--white-dim);margin-top:4px}
+    .calc-benefit{font-size:11px;color:var(--green);margin-top:6px}
+    .amount-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .preset-btn{padding:6px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.2);border-radius:100px;color:var(--white-dim);font-size:12px;cursor:pointer;transition:.2s}
+    .preset-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* Price alert */
+    .alert-active{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--green);background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:100px;padding:4px 12px}
+
+    /* Saving scheme progress */
+    .scheme-progress{margin-bottom:28px}
+    .scheme-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:24px;margin-bottom:14px}
+    .scheme-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .scheme-name{font-size:15px;font-weight:600;color:var(--white)}
+    .scheme-amount{font-size:13px;color:var(--gold)}
+    .progress-bar-wrap{background:var(--black-3);border-radius:100px;height:8px;margin-bottom:10px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:100px;transition:.5s}
+    .progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--white-dim)}
+    .months-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:12px}
+    .month-dot{height:20px;border-radius:4px;background:var(--black-3);border:1px solid rgba(201,168,76,.1);position:relative}
+    .month-dot.paid{background:var(--gold);border-color:var(--gold)}
+    .month-dot.free{background:linear-gradient(135deg,var(--green),#2e7d52);border-color:var(--green)}
+    .month-dot[title]:hover::after{content:attr(title);position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:var(--black-4);color:var(--white);font-size:10px;padding:4px 8px;border-radius:4px;white-space:nowrap;z-index:10;border:1px solid rgba(201,168,76,.2)}
+
+    .hidden{display:none!important}
+    @media(max-width:600px){
+      .portfolio-stats{grid-template-columns:1fr 1fr}
+      .action-grid{grid-template-columns:1fr}
+      .months-grid{grid-template-columns:repeat(6,1fr)}
+      .nav-links .nav-link:not(:last-child){display:none}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em></div>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Price Check</a>
+    <a href="/saving-scheme.html" class="nav-link">💰 Save Scheme</a>
+    <a href="/digital-gold.html" class="nav-link active">🥇 Digital Gold</a>
+    <a href="/login.html?profile=1" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">✦ 24K Pure Digital Gold</div>
+  <h1>Buy. Save. Redeem.<br/><em>Real Gold. Zero Hassle.</em></h1>
+  <p>Buy 24K digital gold from ₹1. Redeem as jewellery or coins with <strong style="color:var(--gold)">50% off making charges</strong>. Completely safe — backed by physical gold.</p>
+  <div class="live-rate-bar">
+    <div class="rate-item">
+      <span class="rate-dot"></span>
+      <span class="rate-label">Live 24K Rate:</span>
+      <span class="rate-value" id="hero-rate">₹9,850/g</span>
+    </div>
+    <div class="rate-item">
+      <span class="rate-label">22K:</span>
+      <span class="rate-value" id="hero-rate-22">₹9,150/g</span>
+    </div>
+    <div class="rate-item">
+      <span class="rate-label">Last Updated:</span>
+      <span class="rate-value" id="hero-time">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH GATE -->
+<div id="auth-section">
+  <!-- Login -->
+  <div class="auth-gate" id="login-panel">
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p>Sign in to your Digital Gold account</p>
+      <div class="form-field">
+        <label>Phone Number</label>
+        <input type="tel" id="login-phone" placeholder="+91 98765 43210" />
+      </div>
+      <div class="form-field hidden" id="otp-field">
+        <label>Enter OTP</label>
+        <input type="text" id="login-otp" placeholder="6-digit OTP" maxlength="6" />
+      </div>
+      <button class="btn-primary" id="btn-login" onclick="handleLogin()">Send OTP</button>
+      <p class="otp-note" id="otp-note">We'll send a 6-digit OTP to your phone</p>
+      <p class="auth-switch">New here? <a onclick="showRegister()">Create account →</a></p>
+    </div>
+  </div>
+
+  <!-- Register -->
+  <div class="auth-gate hidden" id="register-panel">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p>Start your digital gold journey today</p>
+      <div class="form-field">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="Your full name" />
+      </div>
+      <div class="form-field">
+        <label>Phone Number</label>
+        <input type="tel" id="reg-phone" placeholder="+91 98765 43210" />
+      </div>
+      <div class="form-field">
+        <label>Email (optional)</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-field">
+        <label>Referral Code (optional)</label>
+        <input type="text" id="reg-referral" placeholder="Enter friend's code" />
+      </div>
+      <div class="form-field hidden" id="reg-otp-field">
+        <label>Enter OTP</label>
+        <input type="text" id="reg-otp" placeholder="6-digit OTP" maxlength="6" />
+      </div>
+      <button class="btn-primary" id="btn-register" onclick="handleRegister()">Send OTP</button>
+      <p class="auth-switch">Already have account? <a onclick="showLogin()">Sign in →</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard hidden" id="dashboard">
+
+  <!-- Portfolio -->
+  <div class="portfolio-card">
+    <div class="portfolio-top">
+      <div>
+        <div class="portfolio-greeting">Good day,</div>
+        <div class="portfolio-name" id="dash-name">—</div>
+        <div class="portfolio-id" id="dash-phone">—</div>
+      </div>
+      <div class="referral-box">
+        <div class="referral-label">Your Referral Code</div>
+        <div class="referral-code" id="dash-referral" onclick="copyReferral()" title="Click to copy">——</div>
+        <div class="referral-sub">Earn ₹500 gold per referral</div>
+      </div>
+    </div>
+    <div class="portfolio-stats">
+      <div class="p-stat">
+        <div class="p-stat-label">Gold Balance</div>
+        <div class="p-stat-value" id="dash-grams">0.000g</div>
+        <div class="p-stat-sub">24 Karat Pure</div>
+      </div>
+      <div class="p-stat green">
+        <div class="p-stat-label">Current Value</div>
+        <div class="p-stat-value" id="dash-value">₹0</div>
+        <div class="p-stat-sub">At live rate</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">Total Invested</div>
+        <div class="p-stat-value" id="dash-invested">₹0</div>
+        <div class="p-stat-sub">All time</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">Profit / Loss</div>
+        <div class="p-stat-value" id="dash-pnl">₹0</div>
+        <div class="p-stat-sub" id="dash-pnl-pct">0%</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">Making Discount</div>
+        <div class="p-stat-value" style="color:var(--green)">50% OFF</div>
+        <div class="p-stat-sub">On all jewellery</div>
+      </div>
+      <div class="p-stat">
+        <div class="p-stat-label">Price Alert</div>
+        <div class="p-stat-value" id="dash-alert-rate" style="font-size:16px">Not set</div>
+        <div class="p-stat-sub"><a href="#" onclick="openModal('alert-modal')" style="color:var(--gold);font-size:11px">Set alert</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features-bar">
+    <div class="feature-item">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-text"><strong>100% Secure</strong>Backed by physical 24K gold held safely</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">💎</div>
+      <div class="feature-text"><strong>50% Off Making</strong>Redeem as jewellery at half the making charge</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">📈</div>
+      <div class="feature-text"><strong>Live Rates</strong>Buy and sell at real MCX market prices</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🎁</div>
+      <div class="feature-text"><strong>Refer &amp; Earn</strong>₹500 in gold for you and your friend</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-text"><strong>Price Alerts</strong>Get notified when gold hits your target rate</div>
+    </div>
+  </div>
+
+  <!-- Action Cards -->
+  <div class="action-grid">
+    <div class="action-card">
+      <div class="action-icon">🛒</div>
+      <div class="action-title">Buy Digital Gold</div>
+      <div class="action-desc">Buy 24K pure gold starting from just ₹1. Grams added instantly to your account at live rate.</div>
+      <button class="btn-action" onclick="openModal('buy-modal')">Buy Now →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">💸</div>
+      <div class="action-title">Sell Gold</div>
+      <div class="action-desc">Sell your digital gold anytime at current market rate. Amount credited to your bank account.</div>
+      <button class="btn-action red" onclick="openModal('sell-modal')">Sell Gold →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">💍</div>
+      <div class="action-title">Redeem as Jewellery</div>
+      <div class="action-desc">Convert your digital gold to physical jewellery or coins. Enjoy <strong style="color:var(--gold)">50% off making charges</strong>.</div>
+      <button class="btn-action green" onclick="openModal('redeem-modal')">Redeem →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">🪙</div>
+      <div class="action-title">Redeem as Coin</div>
+      <div class="action-desc">Get a physical gold coin delivered to your door. Available in 1g, 2g, 5g, 10g, 50g, 100g.</div>
+      <button class="btn-action" onclick="openModal('coin-modal')">Order Coin →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">🔔</div>
+      <div class="action-title">Price Alert</div>
+      <div class="action-desc">Set your target gold rate. We'll alert you on WhatsApp &amp; SMS the moment rate hits your target.</div>
+      <button class="btn-action" onclick="openModal('alert-modal')">Set Alert →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">👥</div>
+      <div class="action-title">Refer &amp; Earn</div>
+      <div class="action-desc">Share your referral code. When a friend signs up and buys gold, both of you get ₹500 in free gold.</div>
+      <button class="btn-action" onclick="openModal('refer-modal')">Share Code →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">🏦</div>
+      <div class="action-title">Gold Locker</div>
+      <div class="action-desc">Bring your physical gold to our store. We digitise it and add grams to your account — sell anytime.</div>
+      <button class="btn-action" onclick="openModal('locker-modal')">Know More →</button>
+    </div>
+    <div class="action-card">
+      <div class="action-icon">📅</div>
+      <div class="action-title">EMI Jewellery</div>
+      <div class="action-desc">Book any jewellery and pay in 3–6 instalments using your digital gold + cash top-up.</div>
+      <button class="btn-action" onclick="openModal('emi-modal')">Book Now →</button>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="section-title">Transaction History</div>
+  <div class="txn-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Grams</th><th>Rate</th><th>Amount</th><th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="txn-body">
+        <tr><td colspan="6" class="empty-txn">No transactions yet. Buy your first gold! 🥇</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="btn-action" style="margin-top:8px" onclick="logout()">Sign Out</button>
+
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- BUY -->
+<div class="modal-overlay hidden" id="buy-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('buy-modal')">✕</button>
+    <h3>Buy Digital Gold</h3>
+    <p class="modal-sub">24 Karat pure gold at live market rate</p>
+    <div class="amount-presets">
+      <span class="preset-btn" onclick="setBuyAmount(500)">₹500</span>
+      <span class="preset-btn" onclick="setBuyAmount(1000)">₹1,000</span>
+      <span class="preset-btn" onclick="setBuyAmount(2000)">₹2,000</span>
+      <span class="preset-btn" onclick="setBuyAmount(5000)">₹5,000</span>
+      <span class="preset-btn" onclick="setBuyAmount(10000)">₹10,000</span>
+    </div>
+    <div class="form-field">
+      <label>Amount (₹)</label>
+      <input type="number" id="buy-amount" placeholder="Enter amount" min="1" oninput="calcBuy()" />
+    </div>
+    <div class="calc-display">
+      <div class="calc-grams" id="buy-grams">0.000 g</div>
+      <div class="calc-label">24K Gold you will receive</div>
+      <div class="calc-benefit">✓ 50% off making charges when you redeem as jewellery</div>
+    </div>
+    <div class="form-field">
+      <label>Payment Method</label>
+      <select id="buy-payment">
+        <option>UPI (Google Pay / PhonePe / Paytm)</option>
+        <option>Net Banking</option>
+        <option>Credit / Debit Card</option>
+        <option>Cash (visit store)</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="confirmBuy()">Confirm Purchase</button>
+  </div>
+</div>
+
+<!-- SELL -->
+<div class="modal-overlay hidden" id="sell-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('sell-modal')">✕</button>
+    <h3>Sell Digital Gold</h3>
+    <p class="modal-sub">Sell at live rate — amount in 2 business days</p>
+    <div class="form-field">
+      <label>Grams to Sell</label>
+      <input type="number" id="sell-grams" placeholder="Enter grams" min="0.001" step="0.001" oninput="calcSell()" />
+    </div>
+    <div class="calc-display">
+      <div class="calc-grams" id="sell-amount">₹0</div>
+      <div class="calc-label">You will receive (after 1% processing fee)</div>
+    </div>
+    <div class="form-field">
+      <label>Bank Account / UPI ID</label>
+      <input type="text" id="sell-bank" placeholder="UPI ID or account number" />
+    </div>
+    <button class="btn-primary" style="background:linear-gradient(135deg,var(--red),#c04040)" onclick="confirmSell()">Confirm Sale</button>
+  </div>
+</div>
+
+<!-- REDEEM JEWELLERY -->
+<div class="modal-overlay hidden" id="redeem-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('redeem-modal')">✕</button>
+    <h3>Redeem as Jewellery</h3>
+    <p class="modal-sub">Use your digital gold for physical jewellery — <strong style="color:var(--gold)">50% off making charges</strong></p>
+    <div class="form-field">
+      <label>Jewellery Type</label>
+      <select id="redeem-type">
+        <option>Ring</option><option>Necklace</option><option>Chain</option>
+        <option>Earrings</option><option>Bangle</option><option>Pendant</option>
+        <option>Bracelet</option><option>Anklet</option><option>Custom Order</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Grams to Redeem</label>
+      <input type="number" id="redeem-grams" placeholder="Enter grams" min="0.001" step="0.001" oninput="calcRedeem()" />
+    </div>
+    <div class="calc-display">
+      <div class="calc-grams" id="redeem-making">Making Charge: ₹0</div>
+      <div class="calc-label" id="redeem-making-label">Normal making charge</div>
+      <div class="calc-benefit" id="redeem-saving"></div>
+    </div>
+    <div class="form-field">
+      <label>Delivery Address</label>
+      <input type="text" id="redeem-address" placeholder="Full delivery address" />
+    </div>
+    <div class="form-field">
+      <label>Special Instructions</label>
+      <input type="text" id="redeem-notes" placeholder="Size, design preference, etc." />
+    </div>
+    <button class="btn-primary" onclick="confirmRedeem()">Submit Redemption Request</button>
+  </div>
+</div>
+
+<!-- COIN -->
+<div class="modal-overlay hidden" id="coin-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('coin-modal')">✕</button>
+    <h3>Redeem as Gold Coin</h3>
+    <p class="modal-sub">Physical 24K gold coins delivered to your door</p>
+    <div class="form-field">
+      <label>Coin Size</label>
+      <select id="coin-size" onchange="calcCoin()">
+        <option value="1">1 gram</option>
+        <option value="2">2 grams</option>
+        <option value="5">5 grams</option>
+        <option value="10">10 grams</option>
+        <option value="50">50 grams</option>
+        <option value="100">100 grams</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Quantity</label>
+      <input type="number" id="coin-qty" value="1" min="1" oninput="calcCoin()" />
+    </div>
+    <div class="calc-display">
+      <div class="calc-grams" id="coin-total-grams">1.000 g</div>
+      <div class="calc-label">Total gold needed from your balance</div>
+    </div>
+    <div class="form-field">
+      <label>Delivery Address</label>
+      <input type="text" id="coin-address" placeholder="Full delivery address" />
+    </div>
+    <button class="btn-primary" onclick="confirmCoin()">Order Coins</button>
+  </div>
+</div>
+
+<!-- PRICE ALERT -->
+<div class="modal-overlay hidden" id="alert-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('alert-modal')">✕</button>
+    <h3>Set Price Alert</h3>
+    <p class="modal-sub">We'll notify you on WhatsApp when gold hits your target rate</p>
+    <div class="form-field">
+      <label>Current 24K Rate</label>
+      <input type="text" id="alert-current" readonly style="opacity:.6" />
+    </div>
+    <div class="form-field">
+      <label>Alert me when rate drops to (₹ per gram)</label>
+      <input type="number" id="alert-target" placeholder="e.g. 9500" />
+    </div>
+    <div class="form-field">
+      <label>Also alert when rate rises to (₹ per gram)</label>
+      <input type="number" id="alert-high" placeholder="e.g. 10200 (optional)" />
+    </div>
+    <div class="form-field">
+      <label>WhatsApp Number (for alert)</label>
+      <input type="tel" id="alert-phone" placeholder="+91 98765 43210" />
+    </div>
+    <button class="btn-primary" onclick="setPriceAlert()">Set Alert</button>
+  </div>
+</div>
+
+<!-- REFER -->
+<div class="modal-overlay hidden" id="refer-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('refer-modal')">✕</button>
+    <h3>Refer &amp; Earn ₹500</h3>
+    <p class="modal-sub">Both you and your friend get ₹500 worth of free 24K gold when they make their first purchase</p>
+    <div class="calc-display" style="margin-bottom:20px">
+      <div class="calc-grams" id="refer-code-display" style="letter-spacing:.2em">——</div>
+      <div class="calc-label">Your referral code — click to copy</div>
+    </div>
+    <button class="btn-primary" onclick="shareReferral()" style="margin-bottom:12px">Share on WhatsApp 💬</button>
+    <button class="btn-action" onclick="copyReferral()">📋 Copy Link</button>
+    <div style="margin-top:20px;padding:14px;background:var(--black-3);border-radius:var(--r)">
+      <p style="font-size:12px;color:var(--white-dim);line-height:1.6">
+        <strong style="color:var(--white)">How it works:</strong><br/>
+        1. Share your code with friends<br/>
+        2. Friend signs up using your code<br/>
+        3. Friend makes first gold purchase<br/>
+        4. Both of you get ₹500 in digital gold automatically
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- LOCKER -->
+<div class="modal-overlay hidden" id="locker-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('locker-modal')">✕</button>
+    <h3>Gold Locker Service</h3>
+    <p class="modal-sub">Bring your physical gold — we store it digitally so you can sell anytime at live rates</p>
+    <div style="background:var(--black-3);border-radius:var(--r);padding:16px;margin-bottom:20px">
+      <p style="font-size:13px;color:var(--white-dim);line-height:1.8">
+        ✅ <strong style="color:var(--white)">Step 1:</strong> Bring gold to our store<br/>
+        ✅ <strong style="color:var(--white)">Step 2:</strong> We test purity and weigh it<br/>
+        ✅ <strong style="color:var(--white)">Step 3:</strong> Equivalent grams added to your digital account<br/>
+        ✅ <strong style="color:var(--white)">Step 4:</strong> Sell digitally anytime at live rate<br/>
+        ✅ <strong style="color:var(--white)">Step 5:</strong> Or redeem back as jewellery with 50% off making
+      </p>
+    </div>
+    <div class="form-field">
+      <label>Appointment Date</label>
+      <input type="date" id="locker-date" />
+    </div>
+    <div class="form-field">
+      <label>Estimated Gold (grams)</label>
+      <input type="number" id="locker-grams" placeholder="Rough estimate" />
+    </div>
+    <div class="form-field">
+      <label>Phone for confirmation</label>
+      <input type="tel" id="locker-phone" placeholder="+91 98765 43210" />
+    </div>
+    <button class="btn-primary" onclick="bookLocker()">Book Appointment</button>
+  </div>
+</div>
+
+<!-- EMI -->
+<div class="modal-overlay hidden" id="emi-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('emi-modal')">✕</button>
+    <h3>EMI Jewellery Booking</h3>
+    <p class="modal-sub">Book your dream jewellery — pay in easy instalments using digital gold + cash</p>
+    <div class="form-field">
+      <label>Jewellery Description</label>
+      <input type="text" id="emi-item" placeholder="e.g. 22K gold necklace, approx 15g" />
+    </div>
+    <div class="form-field">
+      <label>Total Budget (₹)</label>
+      <input type="number" id="emi-amount" placeholder="e.g. 150000" oninput="calcEMI()" />
+    </div>
+    <div class="form-field">
+      <label>Number of Instalments</label>
+      <select id="emi-months" onchange="calcEMI()">
+        <option value="3">3 months</option>
+        <option value="4">4 months</option>
+        <option value="6">6 months</option>
+      </select>
+    </div>
+    <div class="calc-display">
+      <div class="calc-grams" id="emi-monthly">₹0 / month</div>
+      <div class="calc-label">Monthly instalment (0% interest)</div>
+      <div class="calc-benefit">✓ Pay with digital gold balance + cash top-up</div>
+    </div>
+    <div class="form-field">
+      <label>Delivery Timeline</label>
+      <input type="text" id="emi-delivery" placeholder="e.g. After full payment, 2 weeks delivery" readonly style="opacity:.6" />
+    </div>
+    <button class="btn-primary" onclick="bookEMI()">Book &amp; Get Confirmation</button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+var currentUser  = null;
+var currentRates = { gold_24k: 9850, gold_22k: 9150 };
+var loginStep    = 1; // 1=phone, 2=otp
+var regStep      = 1;
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  loadRates();
+  var saved = localStorage.getItem('dg_user');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); showDashboard(); }
+    catch(e) { localStorage.removeItem('dg_user'); }
+  }
+});
+
+async function loadRates() {
+  try {
+    var res  = await fetch('/rates');
+    var json = await res.json();
+    if (json.success) {
+      currentRates = json.rates;
+      document.getElementById('hero-rate').textContent    = '₹' + Number(json.rates.gold_24k).toLocaleString('en-IN') + '/g';
+      document.getElementById('hero-rate-22').textContent = '₹' + Number(json.rates.gold_22k).toLocaleString('en-IN') + '/g';
+      document.getElementById('hero-time').textContent    = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      if (document.getElementById('alert-current')) {
+        document.getElementById('alert-current').value = '₹' + Number(json.rates.gold_24k).toLocaleString('en-IN') + ' per gram';
+      }
+    }
+  } catch(e) {}
+  setTimeout(loadRates, 60000); // refresh every minute
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+function showLogin()    { document.getElementById('register-panel').classList.add('hidden');    document.getElementById('login-panel').classList.remove('hidden'); loginStep=1; }
+function showRegister() { document.getElementById('login-panel').classList.add('hidden');       document.getElementById('register-panel').classList.remove('hidden'); regStep=1; }
+
+async function handleLogin() {
+  var phone = document.getElementById('login-phone').value.trim();
+  var btn   = document.getElementById('btn-login');
+
+  if (loginStep === 1) {
+    if (!phone || phone.length < 10) { alert('Enter a valid phone number'); return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    var res  = await fetch('/gold/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone }) });
+    var json = await res.json();
+    btn.disabled = false;
+    if (json.success) {
+      loginStep = 2;
+      document.getElementById('otp-field').classList.remove('hidden');
+      document.getElementById('otp-note').textContent = 'OTP sent to ' + phone + '. Demo OTP: ' + (json.demo_otp || '123456');
+      btn.textContent = 'Verify OTP & Sign In';
+    } else { alert(json.error || 'Failed to send OTP'); btn.textContent = 'Send OTP'; }
+  } else {
+    var otp = document.getElementById('login-otp').value.trim();
+    if (!otp) { alert('Enter the OTP'); return; }
+    btn.disabled = true; btn.textContent = 'Verifying…';
+    var res2  = await fetch('/gold/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone, otp: otp }) });
+    var json2 = await res2.json();
+    btn.disabled = false; btn.textContent = 'Verify OTP & Sign In';
+    if (json2.success) { currentUser = json2.user; localStorage.setItem('dg_user', JSON.stringify(currentUser)); showDashboard(); }
+    else { alert(json2.error || 'Invalid OTP'); }
+  }
+}
+
+async function handleRegister() {
+  var name  = document.getElementById('reg-name').value.trim();
+  var phone = document.getElementById('reg-phone').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var ref   = document.getElementById('reg-referral').value.trim();
+  var btn   = document.getElementById('btn-register');
+
+  if (regStep === 1) {
+    if (!name || !phone || phone.length < 10) { alert('Name and valid phone required'); return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    var res  = await fetch('/gold/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:name, phone:phone, email:email, referral_code:ref }) });
+    var json = await res.json();
+    btn.disabled = false;
+    if (json.success) {
+      regStep = 2;
+      document.getElementById('reg-otp-field').classList.remove('hidden');
+      alert('OTP sent to ' + phone + '. Demo OTP: ' + (json.demo_otp || '123456'));
+      btn.textContent = 'Verify OTP & Create Account';
+    } else { alert(json.error || 'Registration failed'); btn.textContent = 'Send OTP'; }
+  } else {
+    var otp = document.getElementById('reg-otp').value.trim();
+    if (!otp) { alert('Enter OTP'); return; }
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    var res2  = await fetch('/gold/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone, otp: otp }) });
+    var json2 = await res2.json();
+    btn.disabled = false; btn.textContent = 'Verify OTP & Create Account';
+    if (json2.success) { currentUser = json2.user; localStorage.setItem('dg_user', JSON.stringify(currentUser)); showDashboard(); }
+    else { alert(json2.error || 'Invalid OTP'); }
+  }
+}
+
+function logout() {
+  localStorage.removeItem('dg_user');
+  currentUser = null;
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('auth-section').classList.remove('hidden');
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────────
+async function showDashboard() {
+  document.getElementById('auth-section').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
+  // Refresh user from server
+  try {
+    var res  = await fetch('/gold/profile?phone=' + encodeURIComponent(currentUser.phone));
+    var json = await res.json();
+    if (json.success) { currentUser = json.user; localStorage.setItem('dg_user', JSON.stringify(currentUser)); }
+  } catch(e) {}
+
+  refreshDashboard();
+  loadTransactions();
+}
+
+function refreshDashboard() {
+  var u         = currentUser;
+  var grams     = parseFloat(u.gold_grams || 0);
+  var invested  = parseFloat(u.total_invested || 0);
+  var value     = grams * currentRates.gold_24k;
+  var pnl       = value - invested;
+  var pnlPct    = invested > 0 ? ((pnl / invested) * 100).toFixed(1) : '0';
+
+  document.getElementById('dash-name').textContent      = u.name || 'Customer';
+  document.getElementById('dash-phone').textContent     = u.phone || '';
+  document.getElementById('dash-referral').textContent  = u.referral_code || '——';
+  document.getElementById('refer-code-display').textContent = u.referral_code || '——';
+  document.getElementById('dash-grams').textContent     = grams.toFixed(4) + 'g';
+  document.getElementById('dash-value').textContent     = '₹' + Math.round(value).toLocaleString('en-IN');
+  document.getElementById('dash-invested').textContent  = '₹' + Math.round(invested).toLocaleString('en-IN');
+  document.getElementById('dash-pnl').textContent       = (pnl >= 0 ? '+₹' : '-₹') + Math.abs(Math.round(pnl)).toLocaleString('en-IN');
+  document.getElementById('dash-pnl').style.color       = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('dash-pnl-pct').textContent   = pnlPct + '%';
+
+  if (u.price_alert_low) {
+    document.getElementById('dash-alert-rate').textContent = '₹' + Number(u.price_alert_low).toLocaleString('en-IN');
+  }
+  if (document.getElementById('alert-phone')) {
+    document.getElementById('alert-phone').value = u.phone || '';
+  }
+}
+
+async function loadTransactions() {
+  try {
+    var res  = await fetch('/gold/transactions?phone=' + encodeURIComponent(currentUser.phone));
+    var json = await res.json();
+    var tbody = document.getElementById('txn-body');
+    if (!json.success || !json.transactions.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-txn">No transactions yet. Buy your first gold! 🥇</td></tr>';
+      return;
+    }
+    tbody.innerHTML = json.transactions.map(function(t) {
+      var dt    = new Date(t.timestamp).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+      var cls   = 'txn-' + t.type;
+      var badge = '<span class="badge badge-' + t.type + '">' + t.type.toUpperCase() + '</span>';
+      var gSign = (t.type === 'buy' || t.type === 'reward') ? '+' : '-';
+      return '<tr><td style="font-size:12px;color:var(--white-dim)">' + dt + '</td><td>' + badge + '</td>' +
+        '<td class="' + cls + '">' + gSign + parseFloat(t.grams || 0).toFixed(4) + 'g</td>' +
+        '<td style="color:var(--white-dim)">₹' + Number(t.rate || 0).toLocaleString('en-IN') + '</td>' +
+        '<td>' + (t.type === 'sell' ? '-' : '') + '₹' + Number(t.amount || 0).toLocaleString('en-IN') + '</td>' +
+        '<td style="font-size:12px;color:var(--white-dim)">' + (t.notes || '') + '</td></tr>';
+    }).join('');
+  } catch(e) {}
+}
+
+// ── Buy ────────────────────────────────────────────────────────────────────────
+function setBuyAmount(amt) { document.getElementById('buy-amount').value = amt; calcBuy(); }
+function calcBuy() {
+  var amt   = parseFloat(document.getElementById('buy-amount').value) || 0;
+  var grams = amt / currentRates.gold_24k;
+  document.getElementById('buy-grams').textContent = grams.toFixed(4) + ' g';
+}
+async function confirmBuy() {
+  var amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+  if (amount < 1) { alert('Minimum ₹1 required'); return; }
+  var res  = await fetch('/gold/buy', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, amount: amount, payment: document.getElementById('buy-payment').value }) });
+  var json = await res.json();
+  if (json.success) {
+    currentUser = json.user; localStorage.setItem('dg_user', JSON.stringify(currentUser));
+    closeModal('buy-modal'); refreshDashboard(); loadTransactions();
+    alert('✅ Successfully bought ' + json.grams + 'g of 24K gold!');
+  } else { alert(json.error || 'Purchase failed'); }
+}
+
+// ── Sell ───────────────────────────────────────────────────────────────────────
+function calcSell() {
+  var grams  = parseFloat(document.getElementById('sell-grams').value) || 0;
+  var amount = grams * currentRates.gold_24k * 0.99; // 1% fee
+  document.getElementById('sell-amount').textContent = '₹' + Math.round(amount).toLocaleString('en-IN');
+}
+async function confirmSell() {
+  var grams = parseFloat(document.getElementById('sell-grams').value) || 0;
+  var bank  = document.getElementById('sell-bank').value.trim();
+  if (grams <= 0) { alert('Enter grams to sell'); return; }
+  if (!bank) { alert('Enter bank account or UPI ID'); return; }
+  if (grams > parseFloat(currentUser.gold_grams || 0)) { alert('Insufficient gold balance'); return; }
+  var res  = await fetch('/gold/sell', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, grams: grams, bank_details: bank }) });
+  var json = await res.json();
+  if (json.success) {
+    currentUser = json.user; localStorage.setItem('dg_user', JSON.stringify(currentUser));
+    closeModal('sell-modal'); refreshDashboard(); loadTransactions();
+    alert('✅ Sale confirmed! ₹' + Math.round(json.amount).toLocaleString('en-IN') + ' will be credited in 2 business days.');
+  } else { alert(json.error || 'Sale failed'); }
+}
+
+// ── Redeem ─────────────────────────────────────────────────────────────────────
+function calcRedeem() {
+  var grams        = parseFloat(document.getElementById('redeem-grams').value) || 0;
+  var goldVal      = grams * currentRates.gold_22k;
+  var normalMaking = goldVal * 0.10; // 10% normal
+  var ourMaking    = normalMaking * 0.50; // 50% off
+  var saving       = normalMaking - ourMaking;
+  document.getElementById('redeem-making').textContent      = 'Making Charge: ₹' + Math.round(ourMaking).toLocaleString('en-IN');
+  document.getElementById('redeem-making-label').textContent = 'Normal charge would be ₹' + Math.round(normalMaking).toLocaleString('en-IN');
+  document.getElementById('redeem-saving').textContent      = '✓ You save ₹' + Math.round(saving).toLocaleString('en-IN') + ' (50% off making charge)';
+}
+async function confirmRedeem() {
+  var grams = parseFloat(document.getElementById('redeem-grams').value) || 0;
+  if (grams <= 0) { alert('Enter grams to redeem'); return; }
+  if (grams > parseFloat(currentUser.gold_grams || 0)) { alert('Insufficient gold balance'); return; }
+  var res  = await fetch('/gold/redeem', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+    phone: currentUser.phone, grams: grams,
+    type: document.getElementById('redeem-type').value,
+    address: document.getElementById('redeem-address').value,
+    notes: document.getElementById('redeem-notes').value,
+  })});
+  var json = await res.json();
+  if (json.success) {
+    currentUser = json.user; localStorage.setItem('dg_user', JSON.stringify(currentUser));
+    closeModal('redeem-modal'); refreshDashboard(); loadTransactions();
+    alert('✅ Redemption request submitted! Our team will contact you in 24 hours.');
+  } else { alert(json.error || 'Redemption failed'); }
+}
+
+// ── Coin ───────────────────────────────────────────────────────────────────────
+function calcCoin() {
+  var size  = parseFloat(document.getElementById('coin-size').value) || 1;
+  var qty   = parseInt(document.getElementById('coin-qty').value) || 1;
+  document.getElementById('coin-total-grams').textContent = (size * qty).toFixed(3) + ' g';
+}
+async function confirmCoin() {
+  var size    = parseFloat(document.getElementById('coin-size').value);
+  var qty     = parseInt(document.getElementById('coin-qty').value);
+  var address = document.getElementById('coin-address').value.trim();
+  var total   = size * qty;
+  if (!address) { alert('Enter delivery address'); return; }
+  if (total > parseFloat(currentUser.gold_grams || 0)) { alert('Insufficient gold balance'); return; }
+  var res  = await fetch('/gold/redeem', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, grams: total, type: 'coin-' + size + 'g-x' + qty, address: address, notes: 'Gold coin order' }) });
+  var json = await res.json();
+  if (json.success) { closeModal('coin-modal'); refreshDashboard(); loadTransactions(); alert('✅ Coin order placed! Delivery in 5–7 business days.'); }
+  else { alert(json.error || 'Order failed'); }
+}
+
+// ── Price Alert ────────────────────────────────────────────────────────────────
+async function setPriceAlert() {
+  var target = parseFloat(document.getElementById('alert-target').value) || 0;
+  var high   = parseFloat(document.getElementById('alert-high').value) || 0;
+  var phone  = document.getElementById('alert-phone').value.trim();
+  if (!target && !high) { alert('Enter at least one target rate'); return; }
+  var res  = await fetch('/gold/set-alert', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, alert_low: target, alert_high: high, whatsapp: phone }) });
+  var json = await res.json();
+  if (json.success) {
+    currentUser.price_alert_low = target;
+    localStorage.setItem('dg_user', JSON.stringify(currentUser));
+    closeModal('alert-modal'); refreshDashboard();
+    alert('✅ Price alert set! We will notify you when gold reaches ₹' + target.toLocaleString('en-IN') + '/g');
+  } else { alert(json.error || 'Failed to set alert'); }
+}
+
+// ── Refer ──────────────────────────────────────────────────────────────────────
+function copyReferral() {
+  var code = currentUser ? currentUser.referral_code : '';
+  var link = window.location.origin + '/digital-gold.html?ref=' + code;
+  navigator.clipboard && navigator.clipboard.writeText(link).then(function() { alert('Referral link copied!'); });
+}
+function shareReferral() {
+  var code = currentUser ? currentUser.referral_code : '';
+  var link = window.location.origin + '/digital-gold.html?ref=' + code;
+  var msg  = encodeURIComponent('Join Saheehisab Digital Gold — buy 24K gold from ₹1 and get 50% off making charges on jewellery!\n\nUse my referral code *' + code + '* and we both get ₹500 in free gold!\n\n' + link);
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ── Locker ─────────────────────────────────────────────────────────────────────
+async function bookLocker() {
+  var date  = document.getElementById('locker-date').value;
+  var grams = document.getElementById('locker-grams').value;
+  var phone = document.getElementById('locker-phone').value.trim();
+  if (!date || !phone) { alert('Date and phone required'); return; }
+  var res  = await fetch('/gold/locker-appointment', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, appointment_date: date, estimated_grams: grams, contact: phone }) });
+  var json = await res.json();
+  if (json.success) { closeModal('locker-modal'); alert('✅ Appointment booked for ' + date + '! We will call to confirm.'); }
+  else { alert(json.error || 'Booking failed'); }
+}
+
+// ── EMI ────────────────────────────────────────────────────────────────────────
+function calcEMI() {
+  var total  = parseFloat(document.getElementById('emi-amount').value) || 0;
+  var months = parseInt(document.getElementById('emi-months').value) || 3;
+  var emi    = total / months;
+  document.getElementById('emi-monthly').textContent   = '₹' + Math.ceil(emi).toLocaleString('en-IN') + ' / month';
+  document.getElementById('emi-delivery').value        = 'Delivery within 2 weeks after final instalment';
+}
+async function bookEMI() {
+  var item   = document.getElementById('emi-item').value.trim();
+  var amount = parseFloat(document.getElementById('emi-amount').value) || 0;
+  var months = document.getElementById('emi-months').value;
+  if (!item || !amount) { alert('Jewellery description and budget required'); return; }
+  var res  = await fetch('/gold/emi-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: currentUser.phone, item: item, total_amount: amount, months: months }) });
+  var json = await res.json();
+  if (json.success) { closeModal('emi-modal'); alert('✅ EMI booking submitted! Reference ID: ' + json.booking_id + '. Our team will call within 24 hours.'); }
+  else { alert(json.error || 'Booking failed'); }
+}
+
+// ── Modal helpers ──────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(function(el) {
+  el.addEventListener('click', function(e) { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// Check referral code in URL
+var urlParams = new URLSearchParams(window.location.search);
+var refCode   = urlParams.get('ref');
+if (refCode && document.getElementById('reg-referral')) {
+  document.getElementById('reg-referral').value = refCode;
+  showRegister();
+}
+</script>
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

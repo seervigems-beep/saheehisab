@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function() {
+  var token    = localStorage.getItem('sh_token');
+  var customer = localStorage.getItem('sh_customer');
+  if (!token || !customer) {
+    // Not logged in — go to login (only once, no loop)
+    if (window.location.pathname !== '/login.html') {
+      window.location.replace('/login.html');
+    }
+  }
+})();
+</script>
+
+<meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saheehisab — Old Gold Exchange Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--black-4:#242424;
+      --gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;
+      --white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;
+      --orange:#E8943A;--blue:#5B9BD5;
+      --font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:10px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(12px)}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}
+    .nav-links{display:flex;gap:8px}
+    .nl{font-size:12px;color:var(--white-dim);text-decoration:none;border:1px solid rgba(201,168,76,.2);padding:7px 13px;border-radius:var(--r);transition:.2s}
+    .nl:hover{color:var(--gold);border-color:var(--gold);background:var(--gold-bg)}
+
+    /* HERO */
+    .hero{padding:48px 20px 32px;text-align:center;background:linear-gradient(180deg,var(--black-2),var(--black));border-bottom:1px solid rgba(201,168,76,.1)}
+    .hero-badge{display:inline-block;padding:4px 14px;background:rgba(232,148,58,.15);border:1px solid rgba(232,148,58,.3);border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:16px}
+    .hero h1{font-family:var(--font-d);font-size:clamp(28px,5vw,48px);font-weight:600;color:var(--white);margin-bottom:10px}
+    .hero h1 em{color:var(--gold);font-style:italic}
+    .hero p{font-size:14px;color:var(--white-dim);max-width:520px;margin:0 auto 24px;line-height:1.7}
+    .hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+    .hs{text-align:center}
+    .hs-num{font-family:var(--font-d);font-size:28px;color:var(--gold);font-weight:600}
+    .hs-label{font-size:11px;color:var(--white-dim);margin-top:2px}
+
+    /* MAIN */
+    .main{max-width:900px;margin:0 auto;padding:36px 20px 80px}
+
+    /* LIVE RATE BAR */
+    .rate-bar{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:14px 20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-bottom:28px}
+    .rate-item{display:flex;align-items:center;gap:8px;font-size:13px}
+    .rate-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .rl{color:var(--white-dim)}
+    .rv{color:var(--gold);font-weight:600}
+    .rate-time{font-size:11px;color:var(--white-dim);margin-left:auto}
+
+    /* CALCULATOR CARD */
+    .calc-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:28px;margin-bottom:24px}
+    .calc-card h2{font-family:var(--font-d);font-size:24px;color:var(--white);margin-bottom:6px}
+    .calc-card p{font-size:13px;color:var(--white-dim);margin-bottom:24px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .ff{display:flex;flex-direction:column;gap:5px}
+    .ff label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .ff input,.ff select{padding:12px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.18);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none;transition:.2s;width:100%}
+    .ff input:focus,.ff select:focus{border-color:var(--gold);background:var(--black-4);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+    .ff select option{background:var(--black-3)}
+    .ff input::placeholder{color:var(--white-dim);opacity:.4}
+    .full{grid-column:1/-1}
+    .btn-calc{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;transition:.2s;margin-top:8px;letter-spacing:.04em}
+    .btn-calc:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(201,168,76,.3)}
+    .btn-calc:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+    /* RESULT */
+    .result-section{display:none}
+    .result-section.visible{display:block;animation:fadeUp .35s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* VERDICT CARD */
+    .verdict-card{border-radius:16px;padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden}
+    .verdict-card::before{content:'';position:absolute;inset:0;opacity:.06;background:radial-gradient(circle at 50% 0%,#fff,transparent)}
+    .verdict-card.green{background:linear-gradient(135deg,#0d2b1a,#0a1f13);border:1px solid rgba(76,175,125,.4)}
+    .verdict-card.ok{background:linear-gradient(135deg,#1a1f0d,#131a09);border:1px solid rgba(160,200,76,.4)}
+    .verdict-card.warn{background:linear-gradient(135deg,#2b1f0d,#1f1609);border:1px solid rgba(232,148,58,.4)}
+    .verdict-card.red{background:linear-gradient(135deg,#2b0d0d,#1f0909);border:1px solid rgba(224,80,80,.4)}
+    .verdict-icon{font-size:48px;margin-bottom:12px;line-height:1}
+    .verdict-title{font-family:var(--font-d);font-size:28px;font-weight:600;margin-bottom:8px}
+    .verdict-card.green .verdict-title{color:#7fd9b0}
+    .verdict-card.ok    .verdict-title{color:#c8e07a}
+    .verdict-card.warn  .verdict-title{color:var(--orange)}
+    .verdict-card.red   .verdict-title{color:#f08080}
+    .verdict-desc{font-size:14px;line-height:1.6;max-width:420px;margin:0 auto}
+    .verdict-card.green .verdict-desc{color:rgba(127,217,176,.8)}
+    .verdict-card.ok    .verdict-desc{color:rgba(200,224,122,.8)}
+    .verdict-card.warn  .verdict-desc{color:rgba(232,148,58,.8)}
+    .verdict-card.red   .verdict-desc{color:rgba(240,128,128,.8)}
+
+    /* BREAKDOWN TABLE */
+    .breakdown-card{background:var(--black-2);border:1px solid rgba(201,168,76,.15);border-radius:14px;overflow:hidden;margin-bottom:20px}
+    .bc-header{background:var(--black-3);padding:14px 20px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim)}
+    .bc-row{display:flex;justify-content:space-between;align-items:center;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,.04);font-size:14px}
+    .bc-row:last-child{border-bottom:none}
+    .bc-row.highlight{background:rgba(201,168,76,.05)}
+    .bc-row.total-row{background:var(--gold-bg);border-top:1px solid rgba(201,168,76,.2)}
+    .bc-label{color:var(--white-dim)}
+    .bc-label.strong{color:var(--white);font-weight:500}
+    .bc-val{font-weight:600}
+    .bc-val.gold{color:var(--gold)}
+    .bc-val.green{color:var(--green)}
+    .bc-val.red{color:var(--red)}
+    .bc-val.orange{color:var(--orange)}
+    .bc-val.white{color:var(--white)}
+    .bc-pct-bar{height:6px;border-radius:100px;margin-top:6px;background:var(--black-3);overflow:hidden}
+    .bc-pct-fill{height:100%;border-radius:100px;transition:width .8s ease}
+
+    /* COMPARISON BAR */
+    .compare-visual{background:var(--black-2);border:1px solid rgba(201,168,76,.15);border-radius:14px;padding:24px;margin-bottom:20px}
+    .compare-visual h3{font-family:var(--font-d);font-size:20px;color:var(--white);margin-bottom:20px}
+    .bar-item{margin-bottom:16px}
+    .bar-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+    .bar-name{color:var(--white-dim)}
+    .bar-val{font-weight:600}
+    .bar-track{height:28px;background:var(--black-3);border-radius:6px;overflow:hidden;position:relative}
+    .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;color:rgba(0,0,0,.8);transition:width 1s ease;white-space:nowrap;min-width:40px}
+    .bar-fill.gold-bar{background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
+    .bar-fill.green-bar{background:linear-gradient(90deg,#2e7d52,var(--green))}
+    .bar-fill.orange-bar{background:linear-gradient(90deg,#a0521a,var(--orange))}
+    .bar-fill.red-bar{background:linear-gradient(90deg,#8b1a1a,var(--red));color:#fff}
+    .bar-fill.blue-bar{background:linear-gradient(90deg,#2a4a8b,var(--blue))}
+
+    /* WHAT TO DO */
+    .advice-card{background:var(--black-2);border-radius:14px;padding:24px;margin-bottom:20px}
+    .advice-card h3{font-family:var(--font-d);font-size:20px;color:var(--white);margin-bottom:16px;padding-left:12px;border-left:3px solid var(--gold)}
+    .advice-item{display:flex;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .advice-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .advice-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+    .advice-text{font-size:13px;color:var(--white-dim);line-height:1.6}
+    .advice-text strong{display:block;color:var(--white);margin-bottom:3px;font-size:14px}
+
+    /* SAHEEHISAB OFFER */
+    .our-offer-card{background:linear-gradient(135deg,var(--gold-bg),#241E00);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden}
+    .our-offer-card::before{content:'◆';position:absolute;right:20px;top:-15px;font-size:100px;color:rgba(201,168,76,.06);line-height:1}
+    .oo-badge{display:inline-block;padding:4px 14px;background:rgba(76,175,125,.2);border:1px solid rgba(76,175,125,.4);border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+    .oo-title{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:6px}
+    .oo-amount{font-family:var(--font-d);font-size:44px;color:var(--gold);font-weight:600;margin-bottom:6px}
+    .oo-sub{font-size:13px;color:var(--white-dim);margin-bottom:20px;line-height:1.5}
+    .oo-features{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+    .oo-feat{text-align:center;font-size:12px;color:var(--white-dim)}
+    .oo-feat span{display:block;font-size:18px;margin-bottom:4px}
+
+    /* ACTION BUTTONS */
+    .action-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+    .btn-whatsapp{padding:14px;background:#25D366;color:#000;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-whatsapp:hover{background:#1ebe5a;transform:translateY(-1px)}
+    .btn-secondary{padding:14px;background:transparent;color:var(--white-dim);border:1px solid rgba(201,168,76,.25);border-radius:var(--r);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* EDUCATION SECTION */
+    .edu-section{margin-bottom:40px}
+    .edu-section h2{font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:6px}
+    .edu-section p{font-size:13px;color:var(--white-dim);margin-bottom:20px}
+    .edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+    .edu-card{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);padding:18px}
+    .edu-icon{font-size:24px;margin-bottom:10px}
+    .edu-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:6px}
+    .edu-text{font-size:12px;color:var(--white-dim);line-height:1.6}
+    .edu-highlight{color:var(--gold);font-weight:600}
+
+    /* COMMON TRAPS */
+    .trap-list{background:var(--black-2);border:1px solid rgba(224,80,80,.2);border-radius:14px;padding:24px;margin-bottom:28px}
+    .trap-list h3{font-family:var(--font-d);font-size:20px;color:var(--white);margin-bottom:16px}
+    .trap-item{display:flex;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .trap-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .trap-icon{font-size:18px;flex-shrink:0}
+    .trap-text strong{display:block;color:var(--white);font-size:13px;margin-bottom:3px}
+    .trap-text p{font-size:12px;color:var(--white-dim);line-height:1.5}
+
+    .section-divider{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(201,168,76,.1)}
+
+    .hidden{display:none!important}
+    @media(max-width:600px){
+      .form-grid{grid-template-columns:1fr}
+      .full{grid-column:1}
+      .action-row{grid-template-columns:1fr}
+      .hero-stats{gap:20px}
+      .oo-features{gap:14px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em></div>
+  <div class="nav-links">
+    <a href="/" class="nl">🔍 Price Check</a>
+    <a href="/catalogue.html" class="nl">📖 Catalogue</a>
+    <a href="/digital-gold.html" class="nl">🥇 Digital Gold</a>
+    <a href="/login.html?profile=1" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">⚠ Old Gold Exchange Checker</div>
+  <h1>Is Your Store Cheating<br/>You on <em>Old Gold?</em></h1>
+  <p>Most jewellers offer only 80–85% of actual gold value when you exchange old jewellery. Enter the details below — we'll tell you exactly what your gold is worth and whether the offer is fair.</p>
+  <div class="hero-stats">
+    <div class="hs"><div class="hs-num">15–20%</div><div class="hs-label">Average loss on exchange</div></div>
+    <div class="hs"><div class="hs-num">₹3,000+</div><div class="hs-label">Lost per 10 grams typically</div></div>
+    <div class="hs"><div class="hs-num">95%</div><div class="hs-label">Fair exchange rate</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- LIVE RATES -->
+  <div class="rate-bar" id="rate-bar">
+    <div class="rate-item"><span class="rate-dot"></span><span class="rl">24K:</span><span class="rv" id="r24">Loading…</span></div>
+    <div class="rate-item"><span class="rl">22K:</span><span class="rv" id="r22">—</span></div>
+    <div class="rate-item"><span class="rl">18K:</span><span class="rv" id="r18">—</span></div>
+    <div class="rate-item"><span class="rl">14K:</span><span class="rv" id="r14">—</span></div>
+    <div class="rate-time" id="rate-time">—</div>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div class="calc-card">
+    <h2>Exchange Value Calculator</h2>
+    <p>Enter your gold details and the price the store is offering you</p>
+
+    <div class="form-grid">
+      <div class="ff">
+        <label>Jewellery Type</label>
+        <select id="f-item-type">
+          <option value="necklace">Necklace / Chain</option>
+          <option value="ring">Ring</option>
+          <option value="earrings">Earrings / Jhumka</option>
+          <option value="bangle">Bangle / Kangan</option>
+          <option value="bracelet">Bracelet / Kada</option>
+          <option value="pendant">Pendant / Locket</option>
+          <option value="coin">Gold Coin / Bar</option>
+          <option value="anklet">Anklet / Payal</option>
+          <option value="other">Other Jewellery</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>Gold Purity</label>
+        <select id="f-purity">
+          <option value="22K">22 Karat (916 Hallmark)</option>
+          <option value="18K">18 Karat (750 Hallmark)</option>
+          <option value="24K">24 Karat (999 Hallmark)</option>
+          <option value="14K">14 Karat (585 Hallmark)</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>Gold Weight (grams)</label>
+        <input type="number" id="f-weight" placeholder="e.g. 12.5" min="0.1" step="0.01" oninput="liveCalculate()" />
+      </div>
+      <div class="ff">
+        <label>Store's Offer (₹) — optional</label>
+        <input type="number" id="f-store-offer" placeholder="What store is offering you" min="0" oninput="liveCalculate()" />
+      </div>
+      <div class="ff">
+        <label>Store Name</label>
+        <input type="text" id="f-store-name" placeholder="e.g. XYZ Jewellers, MG Road" />
+      </div>
+      <div class="ff">
+        <label>Your Phone (for report)</label>
+        <input type="tel" id="f-phone" placeholder="+91 phone number" />
+      </div>
+      <div class="ff full">
+        <label>Your Name</label>
+        <input type="text" id="f-name" placeholder="Your name" />
+      </div>
+    </div>
+
+    <!-- Live preview before full calc -->
+    <div id="live-preview" class="hidden" style="background:var(--black-3);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);padding:14px;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;font-size:13px">
+        <div><span style="color:var(--white-dim)">Melt Value: </span><span style="color:var(--gold);font-weight:600" id="lp-melt">—</span></div>
+        <div><span style="color:var(--white-dim)">Fair Exchange: </span><span style="color:var(--green);font-weight:600" id="lp-fair">—</span></div>
+        <div><span style="color:var(--white-dim)">Our Offer: </span><span style="color:var(--gold);font-weight:600" id="lp-ours">—</span></div>
+        <div id="lp-loss-wrap" class="hidden"><span style="color:var(--white-dim)">Loss vs Fair: </span><span style="color:var(--red);font-weight:600" id="lp-loss">—</span></div>
+      </div>
+    </div>
+
+    <button class="btn-calc" id="btn-calc" onclick="calculate()">Check Exchange Value →</button>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div class="result-section" id="result-section">
+
+    <!-- VERDICT -->
+    <div class="verdict-card" id="verdict-card">
+      <div class="verdict-icon" id="verdict-icon">🔍</div>
+      <div class="verdict-title" id="verdict-title">Analysing…</div>
+      <div class="verdict-desc" id="verdict-desc"></div>
+    </div>
+
+    <!-- BREAKDOWN TABLE -->
+    <div class="breakdown-card">
+      <div class="bc-header">Detailed Breakdown</div>
+      <div class="bc-row">
+        <span class="bc-label">Jewellery Type</span>
+        <span class="bc-val white" id="res-type">—</span>
+      </div>
+      <div class="bc-row">
+        <span class="bc-label">Gold Weight</span>
+        <span class="bc-val white" id="res-weight">—</span>
+      </div>
+      <div class="bc-row">
+        <span class="bc-label">Purity</span>
+        <span class="bc-val white" id="res-purity">—</span>
+      </div>
+      <div class="bc-row">
+        <span class="bc-label">Today's Gold Rate</span>
+        <span class="bc-val gold" id="res-rate">—</span>
+      </div>
+      <div class="bc-row highlight">
+        <span class="bc-label strong">Actual Melt Value (100%)</span>
+        <span class="bc-val gold" id="res-melt">—</span>
+      </div>
+      <div class="bc-row highlight">
+        <div style="flex:1">
+          <span class="bc-label strong">Fair Exchange Value (95%)</span>
+          <div style="font-size:11px;color:var(--white-dim);margin-top:2px">Industry standard — 5% for melting cost</div>
+        </div>
+        <span class="bc-val green" id="res-fair">—</span>
+      </div>
+      <div class="bc-row">
+        <div style="flex:1">
+          <span class="bc-label strong">Minimum Acceptable (90%)</span>
+          <div style="font-size:11px;color:var(--white-dim);margin-top:2px">Below this = you are being underpaid</div>
+        </div>
+        <span class="bc-val orange" id="res-min">—</span>
+      </div>
+      <div class="bc-row" id="store-offer-row">
+        <div style="flex:1">
+          <span class="bc-label strong">Store's Offer</span>
+          <div style="font-size:11px;margin-top:4px">
+            <div class="bc-pct-bar"><div class="bc-pct-fill" id="store-pct-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="bc-val" id="res-store-offer">—</div>
+          <div style="font-size:11px" id="res-store-pct">—</div>
+        </div>
+      </div>
+      <div class="bc-row" id="loss-row">
+        <span class="bc-label strong">You're Losing</span>
+        <span class="bc-val red" id="res-loss">—</span>
+      </div>
+      <div class="bc-row total-row">
+        <span class="bc-label strong">Saheehisab Offers You</span>
+        <span class="bc-val gold" id="res-ours" style="font-size:16px">—</span>
+      </div>
+    </div>
+
+    <!-- VISUAL COMPARISON -->
+    <div class="compare-visual">
+      <h3>Visual Comparison</h3>
+      <div class="bar-item">
+        <div class="bar-header"><span class="bar-name">Actual Melt Value (100%)</span><span class="bar-val" id="bv-melt" style="color:var(--gold)">—</span></div>
+        <div class="bar-track"><div class="bar-fill gold-bar" id="bf-melt" style="width:100%"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-header"><span class="bar-name">Fair Exchange (95%)</span><span class="bar-val" id="bv-fair" style="color:var(--green)">—</span></div>
+        <div class="bar-track"><div class="bar-fill green-bar" id="bf-fair" style="width:95%"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-header"><span class="bar-name">Saheehisab Offer (93%)</span><span class="bar-val" id="bv-ours" style="color:var(--blue)">—</span></div>
+        <div class="bar-track"><div class="bar-fill blue-bar" id="bf-ours" style="width:93%"></div></div>
+      </div>
+      <div class="bar-item" id="store-bar-item" style="display:none">
+        <div class="bar-header"><span class="bar-name" id="store-bar-label">Store's Offer</span><span class="bar-val" id="bv-store" style="color:var(--orange)">—</span></div>
+        <div class="bar-track"><div class="bar-fill orange-bar" id="bf-store" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- WHAT TO DO -->
+    <div class="advice-card" id="advice-card">
+      <h3>What Should You Do?</h3>
+      <div id="advice-content"></div>
+    </div>
+
+    <!-- SAHEEHISAB OFFER -->
+    <div class="our-offer-card">
+      <div class="oo-badge">✓ Better Deal Available</div>
+      <div class="oo-title">Saheehisab Exchange Offer</div>
+      <div class="oo-amount" id="oo-amount">—</div>
+      <div class="oo-sub">We offer <strong>93% of melt value</strong> — better than most stores.<br/>Exchange your old gold with us and use the value for new jewellery.</div>
+      <div class="oo-features">
+        <div class="oo-feat"><span>⚡</span>Instant valuation</div>
+        <div class="oo-feat"><span>🏅</span>BIS certified testing</div>
+        <div class="oo-feat"><span>💎</span>50% off making on new jewellery</div>
+        <div class="oo-feat"><span>📱</span>Transparent calculation</div>
+      </div>
+      <div class="action-row">
+        <button class="btn-whatsapp" onclick="sendToWhatsApp()">
+          <span style="font-size:18px">💬</span> Send to Saheehisab
+        </button>
+        <button class="btn-secondary" onclick="resetCalculator()">↩ Calculate Again</button>
+      </div>
+    </div>
+
+  </div>
+  <!-- END RESULT -->
+
+  <!-- COMMON TRAPS -->
+  <div class="trap-list">
+    <h3>⚠ 6 Common Tricks Jewellers Use on Old Gold Exchange</h3>
+    <div class="trap-item">
+      <div class="trap-icon">⚖️</div>
+      <div class="trap-text">
+        <strong>Wrong weight scale</strong>
+        <p>Some stores use scales that read 10–15% less than actual weight. Always ask them to weigh in front of you and verify on a certified scale.</p>
+      </div>
+    </div>
+    <div class="trap-item">
+      <div class="trap-icon">🔥</div>
+      <div class="trap-text">
+        <strong>"Wastage" deduction (20–30%)</strong>
+        <p>Stores deduct "wastage" for melting — but industry standard is only 3–5%. Anything above 10% is excessive and you should walk away.</p>
+      </div>
+    </div>
+    <div class="trap-item">
+      <div class="trap-icon">📉</div>
+      <div class="trap-text">
+        <strong>Using yesterday's (lower) gold rate</strong>
+        <p>Always check today's live MCX gold rate before going for exchange. Some stores use rates that are 2–5 days old, especially when rates are rising.</p>
+      </div>
+    </div>
+    <div class="trap-item">
+      <div class="trap-icon">💎</div>
+      <div class="trap-text">
+        <strong>Ignoring stones value</strong>
+        <p>If your jewellery has diamonds, rubies, or other stones — the store will often give you zero value for them saying "we can't resell them." A fair buyer should offer something for good quality stones.</p>
+      </div>
+    </div>
+    <div class="trap-item">
+      <div class="trap-icon">🏷️</div>
+      <div class="trap-text">
+        <strong>Purity downgrading</strong>
+        <p>Your 22K jewellery gets tested and suddenly becomes "21K" or "20K." Always insist on the purity certificate (BIS hallmark) and test at a certified facility.</p>
+      </div>
+    </div>
+    <div class="trap-item">
+      <div class="trap-icon">🔁</div>
+      <div class="trap-text">
+        <strong>Forced exchange only (no cash)</strong>
+        <p>Many stores only give exchange value (not cash), then make you buy new jewellery immediately with high making charges — so you lose twice. Always ask if you can get cash or credit note.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="edu-section">
+    <h2>How Gold Exchange Works</h2>
+    <p>Understanding the process protects you from being underpaid</p>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <div class="edu-icon">🔢</div>
+        <div class="edu-title">Melt Value = True Value</div>
+        <div class="edu-text">Your old gold is melted and refined. The <span class="edu-highlight">melt value = weight × today's gold rate</span>. This is what your gold is truly worth. Everything else is negotiation.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon">✅</div>
+        <div class="edu-title">What is a Fair Exchange?</div>
+        <div class="edu-text">A fair exchange is <span class="edu-highlight">92–95% of melt value</span>. The 5–8% covers legitimate melting, refining, and handling costs. Anything below 90% means you're being underpaid.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon">🏅</div>
+        <div class="edu-title">BIS Hallmark = Your Protection</div>
+        <div class="edu-text">Always exchange BIS hallmarked jewellery. <span class="edu-highlight">916 = 22K, 750 = 18K, 999 = 24K</span>. Hallmarked gold cannot be disputed for purity at a certified centre.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon">💡</div>
+        <div class="edu-title">Best Time to Exchange</div>
+        <div class="edu-text">Exchange when gold rates are high — you get more money. <span class="edu-highlight">Avoid exchanging just before Dhanteras/Diwali</span> when stores manipulate local rates down while buying and up while selling.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon">📋</div>
+        <div class="edu-title">Always Get a Receipt</div>
+        <div class="edu-text">Insist on a written receipt showing weight, purity, rate used, and final amount. <span class="edu-highlight">No receipt = no proof</span> if there's a dispute later.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon">🏦</div>
+        <div class="edu-title">Compare 3 Buyers</div>
+        <div class="edu-text">Never accept the first offer. Get quotes from <span class="edu-highlight">at least 3 different buyers</span> — including banks, certified bullion dealers, and trusted jewellers like Saheehisab.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var rates       = {};
+  var lastResult  = null;
+
+  // ── Load Rates ────────────────────────────────────────────────────────────────
+  async function loadRates() {
+    try {
+      var res  = await fetch('/rates');
+      var json = await res.json();
+      if (json.success) {
+        rates = json.rates;
+        document.getElementById('r24').textContent   = '₹' + Number(rates.gold_24k).toLocaleString('en-IN') + '/g';
+        document.getElementById('r22').textContent   = '₹' + Number(rates.gold_22k).toLocaleString('en-IN') + '/g';
+        document.getElementById('r18').textContent   = '₹' + Number(rates.gold_18k).toLocaleString('en-IN') + '/g';
+        document.getElementById('r14').textContent   = '₹' + Number(rates.gold_14k).toLocaleString('en-IN') + '/g';
+        document.getElementById('rate-time').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+      }
+    } catch(e) {}
+    setTimeout(loadRates, 60000);
+  }
+
+  // ── Live Preview ──────────────────────────────────────────────────────────────
+  function liveCalculate() {
+    var weight     = parseFloat(document.getElementById('f-weight').value)      || 0;
+    var purity     = document.getElementById('f-purity').value;
+    var storeOffer = parseFloat(document.getElementById('f-store-offer').value) || 0;
+    if (!weight || !rates.gold_22k) { document.getElementById('live-preview').classList.add('hidden'); return; }
+
+    var goldRate   = getRateForPurity(purity);
+    var melt       = weight * goldRate;
+    var fair       = melt * 0.95;
+    var ours       = melt * 0.93;
+
+    document.getElementById('live-preview').classList.remove('hidden');
+    document.getElementById('lp-melt').textContent = '₹' + Math.round(melt).toLocaleString('en-IN');
+    document.getElementById('lp-fair').textContent = '₹' + Math.round(fair).toLocaleString('en-IN');
+    document.getElementById('lp-ours').textContent = '₹' + Math.round(ours).toLocaleString('en-IN');
+
+    if (storeOffer > 0) {
+      var loss = fair - storeOffer;
+      document.getElementById('lp-loss-wrap').classList.remove('hidden');
+      document.getElementById('lp-loss').textContent = loss > 0 ? '-₹' + Math.round(loss).toLocaleString('en-IN') : '✓ Good offer';
+      document.getElementById('lp-loss').style.color = loss > 0 ? 'var(--red)' : 'var(--green)';
+    } else {
+      document.getElementById('lp-loss-wrap').classList.add('hidden');
+    }
+  }
+
+  // ── Main Calculate ────────────────────────────────────────────────────────────
+  async function calculate() {
+    var weight     = parseFloat(document.getElementById('f-weight').value)      || 0;
+    var purity     = document.getElementById('f-purity').value;
+    var storeOffer = parseFloat(document.getElementById('f-store-offer').value) || 0;
+    var itemType   = document.getElementById('f-item-type').value;
+    var storeName  = document.getElementById('f-store-name').value.trim();
+    var phone      = document.getElementById('f-phone').value.trim();
+    var name       = document.getElementById('f-name').value.trim();
+
+    if (!weight) { alert('Please enter the gold weight in grams'); return; }
+
+    var btn = document.getElementById('btn-calc');
+    btn.disabled = true; btn.textContent = 'Calculating…';
+
+    try {
+      var res  = await fetch('/exchange/calculate', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ weight: weight, purity: purity, store_offer: storeOffer, item_type: itemType, store_name: storeName, customer_phone: phone, customer_name: name }),
+      });
+      var json = await res.json();
+      if (json.success) {
+        lastResult = json.result;
+        lastResult.storeName = storeName;
+        lastResult.itemType  = itemType;
+        renderResult(json.result);
+      } else { alert(json.error || 'Calculation failed'); }
+    } catch(err) { alert('Error: ' + err.message); }
+
+    btn.disabled = false; btn.textContent = 'Check Exchange Value →';
+  }
+
+  function getRateForPurity(purity) {
+    if (purity === '24K') return rates.gold_24k || 9850;
+    if (purity === '18K') return rates.gold_18k || 7390;
+    if (purity === '14K') return rates.gold_14k || 5700;
+    return rates.gold_22k || 9150;
+  }
+
+  // ── Render Result ─────────────────────────────────────────────────────────────
+  function renderResult(r) {
+    var fmt   = function(n) { return '₹' + Math.round(parseFloat(n)).toLocaleString('en-IN'); };
+    var melt  = parseFloat(r.melt_value);
+    var fair  = parseFloat(r.fair_exchange);
+    var ours  = parseFloat(r.saheehisab_offer);
+    var store = parseFloat(r.store_offer);
+    var loss  = parseFloat(r.loss_vs_fair);
+
+    // Verdict
+    var verdicts = {
+      excellent: { icon:'🎉', title:'Excellent Offer!', desc:'The store is offering you a very fair price. This is above 95% of market value — you can proceed with confidence.' },
+      fair     : { icon:'✅', title:'Fair Offer',        desc:'The store\'s offer is within acceptable range (90–95% of melt value). You\'re not losing significantly. Still, compare with our offer.' },
+      low      : { icon:'⚠️',  title:'Below Fair Value', desc:'The store is offering you less than 90% of your gold\'s market value. You are losing ₹' + Math.round(loss).toLocaleString('en-IN') + ' compared to a fair deal. Negotiate or visit Saheehisab.' },
+      bad      : { icon:'🚨', title:'Very Unfair Offer!', desc:'The store is offering only ' + r.store_offer_pct + '% of your gold\'s value — you are losing ₹' + Math.round(loss).toLocaleString('en-IN') + '. Do NOT accept this. Get our offer instead.' },
+      enter_offer: { icon:'🔍', title:'Enter Store\'s Offer', desc:'You haven\'t entered the store\'s offer yet. Add it above to see if their deal is fair, or proceed to contact Saheehisab directly for the best rate.' },
+    };
+
+    var v = verdicts[r.verdict] || verdicts.enter_offer;
+    var vc = document.getElementById('verdict-card');
+    vc.className = 'verdict-card ' + r.verdict_class;
+    document.getElementById('verdict-icon').textContent  = v.icon;
+    document.getElementById('verdict-title').textContent = v.title;
+    document.getElementById('verdict-desc').textContent  = v.desc;
+
+    // Breakdown
+    var itemLabels = { necklace:'Necklace / Chain', ring:'Ring', earrings:'Earrings', bangle:'Bangle', bracelet:'Bracelet', pendant:'Pendant', coin:'Gold Coin', anklet:'Anklet', other:'Jewellery' };
+    document.getElementById('res-type').textContent   = itemLabels[r.itemType] || 'Jewellery';
+    document.getElementById('res-weight').textContent = r.weight + ' grams';
+    document.getElementById('res-purity').textContent = r.purity;
+    document.getElementById('res-rate').textContent   = fmt(r.gold_rate) + ' per gram';
+    document.getElementById('res-melt').textContent   = fmt(melt);
+    document.getElementById('res-fair').textContent   = fmt(fair);
+    document.getElementById('res-min').textContent    = fmt(parseFloat(r.minimum_acceptable));
+    document.getElementById('res-ours').textContent   = fmt(ours);
+    document.getElementById('oo-amount').textContent  = fmt(ours);
+
+    // Store offer
+    if (store > 0) {
+      document.getElementById('res-store-offer').textContent = fmt(store);
+      document.getElementById('res-store-offer').className   = 'bc-val ' + (r.verdict === 'excellent' || r.verdict === 'fair' ? 'green' : r.verdict === 'low' ? 'orange' : 'red');
+      document.getElementById('res-store-pct').textContent   = r.store_offer_pct + '% of melt value';
+      document.getElementById('res-store-pct').style.color   = r.verdict === 'bad' || r.verdict === 'low' ? 'var(--red)' : 'var(--green)';
+
+      var pctWidth = Math.min(parseFloat(r.store_offer_pct), 100);
+      var barColor = r.verdict === 'excellent' ? '#4CAF7D' : r.verdict === 'fair' ? '#8bc34a' : r.verdict === 'low' ? '#E8943A' : '#E05050';
+      document.getElementById('store-pct-bar').style.width      = pctWidth + '%';
+      document.getElementById('store-pct-bar').style.background = barColor;
+
+      document.getElementById('res-loss').textContent = loss > 0 ? fmt(loss) : '—';
+      document.getElementById('loss-row').style.display = loss > 0 ? 'flex' : 'none';
+
+      // Bars
+      document.getElementById('store-bar-item').style.display = 'block';
+      document.getElementById('store-bar-label').textContent  = (r.storeName || 'Store') + '\'s Offer (' + r.store_offer_pct + '%)';
+      document.getElementById('bv-store').textContent = fmt(store);
+      setTimeout(function() {
+        document.getElementById('bf-store').style.width = pctWidth + '%';
+        var fc = pctWidth >= 95 ? 'green-bar' : pctWidth >= 90 ? 'orange-bar' : 'red-bar';
+        document.getElementById('bf-store').className = 'bar-fill ' + fc;
+      }, 100);
+    } else {
+      document.getElementById('res-store-offer').textContent = 'Not entered';
+      document.getElementById('loss-row').style.display = 'none';
+      document.getElementById('store-bar-item').style.display = 'none';
+    }
+
+    // Visual bars
+    document.getElementById('bv-melt').textContent = fmt(melt);
+    document.getElementById('bv-fair').textContent = fmt(fair);
+    document.getElementById('bv-ours').textContent = fmt(ours);
+    setTimeout(function() {
+      document.getElementById('bf-fair').style.width = '95%';
+      document.getElementById('bf-ours').style.width = '93%';
+    }, 100);
+
+    // Advice
+    var adviceMap = {
+      excellent: [
+        { icon:'✅', title:'Good Deal', text:'This is a fair offer. You can proceed if you\'re happy with the jewellery you\'re buying in exchange.' },
+        { icon:'💡', title:'Still Compare', text:'Even with a good offer, always ask Saheehisab for a counter-offer. You might get an even better deal.' },
+      ],
+      fair: [
+        { icon:'🤝', title:'Negotiate Slightly', text:'Ask them to improve to 93–95% of melt value. A good jeweller will agree to a small increase.' },
+        { icon:'💎', title:'Check New Jewellery Making', text:'Even if exchange value is fair, check their making charges on the new jewellery — that\'s where margins are often very high.' },
+      ],
+      low: [
+        { icon:'🚪', title:'Don\'t Accept Yet', text:'Walk out politely and tell them you\'ll think about it. This gives you time to compare. Never accept the first offer under pressure.' },
+        { icon:'📱', title:'Contact Saheehisab', text:'Send us the details via WhatsApp. We\'ll give you our exchange offer — likely ₹' + Math.round(loss).toLocaleString('en-IN') + ' more than their offer.' },
+        { icon:'⚖️', title:'Show Them This Calculation', text:'Show the store this screen. It shows live MCX rates and fair exchange percentage. Many will improve their offer when they see you\'re informed.' },
+      ],
+      bad: [
+        { icon:'🚨', title:'Do NOT Accept This Offer', text:'This is far below market value. You are being significantly underpaid. Leave immediately.' },
+        { icon:'📱', title:'Contact Saheehisab Right Now', text:'We will give you at least ₹' + Math.round(loss).toLocaleString('en-IN') + ' more for the same gold. Contact us via WhatsApp.' },
+        { icon:'📋', title:'Report if Possible', text:'If the store is using a wrong scale or misrepresenting purity, you can report to BIS (Bureau of Indian Standards) at bis.gov.in.' },
+      ],
+      enter_offer: [
+        { icon:'💡', title:'Know Your Gold\'s Worth First', text:'Your gold\'s melt value is calculated above. Use this as your reference when negotiating with any store.' },
+        { icon:'📱', title:'Get Saheehisab\'s Offer', text:'Contact us before visiting any store. We\'ll give you our rate upfront so you have a benchmark.' },
+      ],
+    };
+
+    var advices = adviceMap[r.verdict] || adviceMap.enter_offer;
+    document.getElementById('advice-content').innerHTML = advices.map(function(a) {
+      return '<div class="advice-item"><div class="advice-icon">' + a.icon + '</div><div class="advice-text"><strong>' + a.title + '</strong>' + a.text + '</div></div>';
+    }).join('');
+
+    // Show result section
+    var rs = document.getElementById('result-section');
+    rs.classList.add('visible');
+    setTimeout(function() { rs.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+  }
+
+  // ── WhatsApp ──────────────────────────────────────────────────────────────────
+  function sendToWhatsApp() {
+    if (!lastResult) return;
+    var r    = lastResult;
+    var fmt  = function(n) { return 'Rs.' + Math.round(parseFloat(n)).toLocaleString('en-IN'); };
+    var name = document.getElementById('f-name').value.trim();
+    var phone= document.getElementById('f-phone').value.trim();
+
+    var msg = '*Old Gold Exchange Enquiry — Saheehisab*\n\n' +
+      (name  ? 'Customer: ' + name  + '\n' : '') +
+      (phone ? 'Phone: '   + phone  + '\n' : '') +
+      '\n*Gold Details:*\n' +
+      'Type: ' + (r.itemType || 'Jewellery') + '\n' +
+      'Weight: ' + r.weight + 'g\n' +
+      'Purity: ' + r.purity + '\n' +
+      'Today\'s Rate: ' + fmt(r.gold_rate) + '/g\n' +
+      '\n*Valuation:*\n' +
+      'Melt Value: '       + fmt(r.melt_value)     + '\n' +
+      'Fair Exchange (95%): ' + fmt(r.fair_exchange) + '\n' +
+      'Saheehisab Offer (93%): *' + fmt(r.saheehisab_offer) + '*\n' +
+      (parseFloat(r.store_offer) > 0 ? 'Store Offered: ' + fmt(r.store_offer) + ' (' + r.store_offer_pct + '% — ' + r.verdict + ')\n' : '') +
+      (r.storeName ? 'Store Name: ' + r.storeName + '\n' : '') +
+      '\n_Please contact me with your best exchange rate_\n' +
+      '_Sent via Saheehisab AI Exchange Calculator_';
+
+    window.open('https://wa.me/919509458270?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  function resetCalculator() {
+    document.getElementById('result-section').classList.remove('visible');
+    document.getElementById('f-weight').value      = '';
+    document.getElementById('f-store-offer').value = '';
+    document.getElementById('live-preview').classList.add('hidden');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  loadRates();
+</script>
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

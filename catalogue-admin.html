@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saheehisab — Catalogue Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--black-4:#242424;--gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;--white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;--font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:8px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+    .logo{font-family:var(--font-d);font-size:20px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}.logo span{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim);margin-left:14px}
+    .nav-links{display:flex;gap:8px}
+    .nav-link{font-size:12px;color:var(--white-dim);text-decoration:none;border:1px solid rgba(201,168,76,.2);padding:7px 14px;border-radius:var(--r);transition:.2s}
+    .nav-link:hover,.nav-link.active{color:var(--gold);border-color:var(--gold);background:var(--gold-bg)}
+    .page{max-width:1100px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start}
+    @media(max-width:768px){.page{grid-template-columns:1fr}}
+
+    /* ADD FORM */
+    .add-panel{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:24px;position:sticky;top:80px}
+    .add-panel h2{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:20px}
+    .ff{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .ff label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .ff input,.ff select,.ff textarea{padding:10px 12px;background:var(--black-3);border:1px solid rgba(201,168,76,.18);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:13px;outline:none;transition:.2s;width:100%}
+    .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--gold);background:var(--black-4)}
+    .ff select option{background:var(--black-3)}
+    .ff textarea{resize:vertical;min-height:70px}
+    .ff-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .ff-row .ff{margin-bottom:0}
+
+    /* IMAGE UPLOAD ZONE */
+    .img-upload-zone{border:2px dashed rgba(201,168,76,.25);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:.2s;margin-bottom:12px}
+    .img-upload-zone:hover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+    .img-upload-zone p{font-size:12px;color:var(--white-dim);margin-top:6px}
+    .img-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+    .img-preview-item{position:relative;aspect-ratio:1}
+    .img-preview-item img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+    .img-preview-item button{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);border:none;border-radius:50%;width:20px;height:20px;color:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+
+    .btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-top:4px}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(201,168,76,.3)}
+    .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn-secondary{width:100%;padding:10px;background:transparent;color:var(--white-dim);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);font-size:13px;cursor:pointer;transition:.2s;margin-top:6px}
+    .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* PRODUCTS LIST */
+    .products-panel h2{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:6px}
+    .products-panel p{font-size:13px;color:var(--white-dim);margin-bottom:20px}
+    .admin-product-card{background:var(--black-2);border:1px solid rgba(201,168,76,.12);border-radius:12px;padding:16px;display:grid;grid-template-columns:80px 1fr auto;gap:14px;align-items:center;margin-bottom:12px;transition:.2s}
+    .admin-product-card:hover{border-color:rgba(201,168,76,.3)}
+    .admin-product-card.inactive{opacity:.45}
+    .apc-img{width:80px;height:80px;object-fit:cover;border-radius:8px;background:var(--black-3)}
+    .apc-img-placeholder{width:80px;height:80px;background:var(--black-3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold-dim);opacity:.4}
+    .apc-name{font-size:15px;font-weight:600;color:var(--white);margin-bottom:4px}
+    .apc-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+    .chip{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;border:1px solid}
+    .chip-making{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3);color:var(--gold)}
+    .chip-type{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--white-dim)}
+    .chip-inactive{background:rgba(224,80,80,.1);border-color:rgba(224,80,80,.3);color:var(--red)}
+    .apc-desc{font-size:11px;color:var(--white-dim)}
+    .apc-actions{display:flex;flex-direction:column;gap:6px}
+    .btn-edit{padding:7px 14px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+    .btn-edit:hover{background:rgba(201,168,76,.15)}
+    .btn-toggle{padding:7px 14px;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.3);border-radius:var(--r);color:var(--green);font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap}
+    .btn-toggle.hide{background:rgba(224,80,80,.08);border-color:rgba(224,80,80,.3);color:var(--red)}
+    .btn-del-small{padding:7px 14px;background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.25);border-radius:var(--r);color:var(--red);font-size:12px;cursor:pointer;transition:.2s}
+    .btn-del-small:hover{background:rgba(224,80,80,.15)}
+    .count-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .count-badge{font-size:12px;color:var(--white-dim);background:var(--black-3);border:1px solid rgba(201,168,76,.1);border-radius:100px;padding:4px 12px}
+    .filter-row{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+    .filt-btn{padding:5px 12px;background:var(--black-3);border:1px solid rgba(201,168,76,.12);border-radius:100px;color:var(--white-dim);font-size:11px;cursor:pointer;transition:.2s}
+    .filt-btn.active{border-color:var(--gold);color:var(--gold)}
+    .empty{text-align:center;padding:40px;color:var(--white-dim)}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);padding:10px 24px;border-radius:100px;font-size:13px;font-weight:600;z-index:9999;animation:fadeUp .25s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Saheehisab <em>AI</em> <span>Catalogue Admin</span></div>
+  <div class="nav-links">
+    <a href="/catalogue.html" class="nav-link">👁 View Catalogue</a>
+    <a href="/admin.html" class="nav-link">⚙ Admin</a>
+    <a href="/leads.html" class="nav-link">📋 Leads</a>
+    <a href="/" class="nav-link">← App</a>
+    <a href="/login.html" style="font-size:12px;color:#C9A84C;border:1px solid rgba(201,168,76,.35);padding:7px 13px;border-radius:10px;text-decoration:none;background:#1C1608;font-weight:600">👤 My Account</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ADD / EDIT FORM -->
+  <div class="add-panel" id="add-panel">
+    <h2 id="form-title">Add New Product</h2>
+
+    <!-- Image Upload -->
+    <div class="ff">
+      <label>Product Photos (up to 6)</label>
+      <div class="img-upload-zone" onclick="document.getElementById('img-file-input').click()">
+        <div style="font-size:28px;color:var(--gold-dim)">📷</div>
+        <p>Click to upload photos<br/>JPG, PNG, WEBP · max 8MB each</p>
+      </div>
+      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="handleImgSelect(event)" />
+      <div class="img-preview-grid" id="img-preview-grid"></div>
+    </div>
+
+    <div class="ff">
+      <label>Product Name *</label>
+      <input type="text" id="f-name" placeholder="e.g. Traditional Temple Necklace Set" />
+    </div>
+
+    <div class="ff-row">
+      <div class="ff">
+        <label>Jewellery Type *</label>
+        <select id="f-type">
+          <option value="chain">Chain</option>
+          <option value="ring">Ring</option>
+          <option value="necklace">Necklace</option>
+          <option value="earrings">Earrings</option>
+          <option value="bangle">Bangle</option>
+          <option value="pendant">Pendant</option>
+          <option value="bracelet">Bracelet</option>
+          <option value="jhumka">Jhumka</option>
+          <option value="anklet">Anklet</option>
+          <option value="temple">Temple</option>
+          <option value="kundan">Kundan</option>
+          <option value="plain">Plain Gold</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>Making Charge % *</label>
+        <input type="number" id="f-making" placeholder="e.g. 8" min="0" max="100" step="0.5" />
+      </div>
+    </div>
+
+    <div class="ff-row">
+      <div class="ff">
+        <label>Metal</label>
+        <select id="f-metal">
+          <option value="Gold">Gold</option>
+          <option value="Silver">Silver</option>
+          <option value="Platinum">Platinum</option>
+        </select>
+      </div>
+      <div class="ff">
+        <label>Purity</label>
+        <select id="f-purity">
+          <option value="22K">22 Karat</option>
+          <option value="18K">18 Karat</option>
+          <option value="24K">24 Karat</option>
+          <option value="14K">14 Karat</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="ff-row">
+      <div class="ff">
+        <label>Min Weight (g)</label>
+        <input type="number" id="f-wmin" placeholder="e.g. 5" min="0" step="0.1" />
+      </div>
+      <div class="ff">
+        <label>Max Weight (g)</label>
+        <input type="number" id="f-wmax" placeholder="e.g. 15" min="0" step="0.1" />
+      </div>
+    </div>
+
+    <div class="ff">
+      <label>Stones (if any)</label>
+      <input type="text" id="f-stones" placeholder="e.g. Diamond, Ruby, Polki" />
+    </div>
+
+    <div class="ff">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="Describe the design, occasion, features…"></textarea>
+    </div>
+
+    <div class="ff">
+      <label>Tags (comma separated)</label>
+      <input type="text" id="f-tags" placeholder="e.g. bridal, antique, daily wear" />
+    </div>
+
+    <input type="hidden" id="f-edit-id" value="" />
+    <button class="btn-primary" id="btn-submit" onclick="submitProduct()">Add to Catalogue</button>
+    <button class="btn-secondary hidden" id="btn-cancel" onclick="cancelEdit()">Cancel Edit</button>
+  </div>
+
+  <!-- PRODUCTS LIST -->
+  <div class="products-panel">
+    <h2>Your Catalogue</h2>
+    <p>All products are visible to logged-in customers at <a href="/catalogue.html" style="color:var(--gold)">/catalogue.html</a></p>
+
+    <div class="count-bar">
+      <div class="count-badge" id="product-count">Loading…</div>
+      <a href="/catalogue.html" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none">View as customer →</a>
+    </div>
+
+    <div class="filter-row" id="admin-type-filters">
+      <button class="filt-btn active" data-t="" onclick="adminFilter(this,'')">All</button>
+      <button class="filt-btn" data-t="chain"    onclick="adminFilter(this,'chain')">Chain</button>
+      <button class="filt-btn" data-t="ring"     onclick="adminFilter(this,'ring')">Ring</button>
+      <button class="filt-btn" data-t="necklace" onclick="adminFilter(this,'necklace')">Necklace</button>
+      <button class="filt-btn" data-t="earrings" onclick="adminFilter(this,'earrings')">Earrings</button>
+      <button class="filt-btn" data-t="bangle"   onclick="adminFilter(this,'bangle')">Bangle</button>
+      <button class="filt-btn" data-t="temple"   onclick="adminFilter(this,'temple')">Temple</button>
+      <button class="filt-btn" data-t="kundan"   onclick="adminFilter(this,'kundan')">Kundan</button>
+    </div>
+
+    <div id="admin-products-list">
+      <div class="empty">Loading products…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var selectedFiles  = [];  // new files to upload
+  var editingId      = null;
+  var allAdminProds  = [];
+  var adminTypeFilter = '';
+
+  // ── Load Products ────────────────────────────────────────────────────────────
+  async function loadAdminProducts() {
+    var res  = await fetch('/catalogue?type=' + adminTypeFilter);
+    var json = await res.json();
+    allAdminProds = json.products || [];
+    renderAdminProducts(allAdminProds);
+    document.getElementById('product-count').textContent = allAdminProds.length + ' products';
+  }
+
+  function adminFilter(btn, type) {
+    document.querySelectorAll('.filt-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    adminTypeFilter = type;
+    loadAdminProducts();
+  }
+
+  function renderAdminProducts(products) {
+    var list = document.getElementById('admin-products-list');
+    if (!products.length) { list.innerHTML = '<div class="empty">No products yet. Add your first product using the form.</div>'; return; }
+    list.innerHTML = products.map(function(p) {
+      var img = p.images && p.images[0]
+        ? '<img class="apc-img" src="' + p.images[0] + '" />'
+        : '<div class="apc-img-placeholder">◆</div>';
+      var weightTxt = p.typical_weight_min && p.typical_weight_max
+        ? p.typical_weight_min + '–' + p.typical_weight_max + 'g' : '';
+      return '<div class="admin-product-card' + (p.active===false?' inactive':'') + '">' +
+        img +
+        '<div>' +
+          '<div class="apc-name">' + (p.name||'Unnamed') + '</div>' +
+          '<div class="apc-chips">' +
+            '<span class="chip chip-making">Making ' + p.making_percent + '%</span>' +
+            '<span class="chip chip-type">' + (p.jewellery_type||'').toUpperCase() + '</span>' +
+            (weightTxt ? '<span class="chip chip-type">' + weightTxt + '</span>' : '') +
+            (p.active===false ? '<span class="chip chip-inactive">HIDDEN</span>' : '') +
+          '</div>' +
+          '<div class="apc-desc">' + (p.description||'').slice(0,70) + (p.description&&p.description.length>70?'…':'') + '</div>' +
+          (p.images ? '<div style="font-size:11px;color:var(--gold-dim);margin-top:4px">' + p.images.length + ' photo(s)</div>' : '') +
+        '</div>' +
+        '<div class="apc-actions">' +
+          '<button class="btn-edit" onclick="editProduct(\'' + p.id + '\')">✏ Edit</button>' +
+          '<button class="btn-toggle' + (p.active===false?'':' hide') + '" onclick="toggleActive(\'' + p.id + '\',' + (p.active===false) + ')">' + (p.active===false?'👁 Show':'🚫 Hide') + '</button>' +
+          '<button class="btn-del-small" onclick="deleteProduct(\'' + p.id + '\')">🗑 Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── Image Handling ────────────────────────────────────────────────────────────
+  function handleImgSelect(event) {
+    var files = Array.from(event.target.files);
+    selectedFiles = selectedFiles.concat(files).slice(0, 6);
+    renderImgPreviews();
+  }
+
+  function renderImgPreviews() {
+    var grid = document.getElementById('img-preview-grid');
+    grid.innerHTML = selectedFiles.map(function(f, i) {
+      var url = URL.createObjectURL(f);
+      return '<div class="img-preview-item">' +
+        '<img src="' + url + '" />' +
+        '<button onclick="removeImg(' + i + ')">✕</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  function removeImg(idx) {
+    selectedFiles.splice(idx, 1);
+    renderImgPreviews();
+  }
+
+  // ── Submit Product ────────────────────────────────────────────────────────────
+  async function submitProduct() {
+    var name    = document.getElementById('f-name').value.trim();
+    var type    = document.getElementById('f-type').value;
+    var making  = document.getElementById('f-making').value;
+    if (!name || !making) { showToast('Name and making % are required'); return; }
+
+    var btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    var formData = new FormData();
+    formData.append('name',           name);
+    formData.append('jewellery_type', type);
+    formData.append('making_percent', making);
+    formData.append('metal',          document.getElementById('f-metal').value);
+    formData.append('purity',         document.getElementById('f-purity').value);
+    formData.append('weight_min',     document.getElementById('f-wmin').value || '0');
+    formData.append('weight_max',     document.getElementById('f-wmax').value || '0');
+    formData.append('stones',         document.getElementById('f-stones').value);
+    formData.append('description',    document.getElementById('f-desc').value);
+    formData.append('tags',           document.getElementById('f-tags').value);
+    selectedFiles.forEach(function(f) { formData.append('images', f); });
+
+    try {
+      var url    = editingId ? '/catalogue/' + editingId : '/catalogue';
+      var method = editingId ? 'PUT' : 'POST';
+      var res    = await fetch(url, { method: method, body: formData });
+      var json   = await res.json();
+      if (json.success) {
+        showToast(editingId ? '✓ Product updated!' : '✓ Product added!');
+        resetForm();
+        loadAdminProducts();
+      } else { showToast('Error: ' + (json.error || 'Failed')); }
+    } catch(err) { showToast('Error: ' + err.message); }
+    btn.disabled = false; btn.textContent = editingId ? 'Update Product' : 'Add to Catalogue';
+  }
+
+  // ── Edit ──────────────────────────────────────────────────────────────────────
+  function editProduct(id) {
+    var p = allAdminProds.find(function(x) { return x.id === id; });
+    if (!p) return;
+    editingId = id;
+
+    document.getElementById('f-name').value    = p.name || '';
+    document.getElementById('f-making').value  = p.making_percent || '';
+    document.getElementById('f-stones').value  = p.stones || '';
+    document.getElementById('f-desc').value    = p.description || '';
+    document.getElementById('f-tags').value    = (p.tags||[]).join(', ');
+    document.getElementById('f-wmin').value    = p.typical_weight_min || '';
+    document.getElementById('f-wmax').value    = p.typical_weight_max || '';
+
+    // Set selects
+    setSelect('f-type',   p.jewellery_type);
+    setSelect('f-metal',  p.metal);
+    setSelect('f-purity', p.purity);
+
+    // Show existing images as previews
+    var grid = document.getElementById('img-preview-grid');
+    grid.innerHTML = (p.images||[]).map(function(src) {
+      return '<div class="img-preview-item"><img src="' + src + '" /><div style="font-size:10px;color:var(--white-dim);margin-top:2px;text-align:center">Existing</div></div>';
+    }).join('');
+
+    selectedFiles = [];
+    document.getElementById('form-title').textContent = 'Edit Product';
+    document.getElementById('btn-submit').textContent = 'Update Product';
+    document.getElementById('btn-cancel').classList.remove('hidden');
+    document.getElementById('add-panel').scrollIntoView({ behavior:'smooth' });
+  }
+
+  function cancelEdit() { resetForm(); }
+
+  function resetForm() {
+    editingId = null;
+    ['f-name','f-making','f-stones','f-desc','f-tags','f-wmin','f-wmax'].forEach(function(id){ document.getElementById(id).value=''; });
+    selectedFiles = [];
+    document.getElementById('img-preview-grid').innerHTML = '';
+    document.getElementById('img-file-input').value = '';
+    document.getElementById('form-title').textContent = 'Add New Product';
+    document.getElementById('btn-submit').textContent = 'Add to Catalogue';
+    document.getElementById('btn-cancel').classList.add('hidden');
+  }
+
+  function setSelect(id, val) {
+    var sel = document.getElementById(id);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === val) { sel.selectedIndex = i; return; }
+    }
+  }
+
+  // ── Toggle Active ─────────────────────────────────────────────────────────────
+  async function toggleActive(id, makeActive) {
+    var fd = new FormData();
+    fd.append('active', makeActive ? 'true' : 'false');
+    var res  = await fetch('/catalogue/' + id, { method:'PUT', body: fd });
+    var json = await res.json();
+    if (json.success) { showToast(makeActive ? '✓ Product shown' : '✓ Product hidden'); loadAdminProducts(); }
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────────
+  async function deleteProduct(id) {
+    if (!confirm('Delete this product permanently?')) return;
+    var res  = await fetch('/catalogue/' + id, { method:'DELETE' });
+    var json = await res.json();
+    if (json.success) { showToast('✓ Product deleted'); loadAdminProducts(); }
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    var existing = document.getElementById('_toast');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.id = '_toast'; t.className = 'toast'; t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2500);
+  }
+
+  loadAdminProducts();
+</script>
+
+<footer style="background:#111111;border-top:1px solid rgba(201,168,76,.2);margin-top:60px">
+  <div style="max-width:1100px;margin:0 auto;padding:48px 24px 36px;display:grid;grid-template-columns:280px 1fr;gap:48px">
+
+    <!-- Brand + Certs -->
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#F5F0E8;margin-bottom:4px">
+        <span style="color:#C9A84C">◆</span> Saheehisab <em style="color:#C9A84C;font-style:italic">AI</em>
+      </div>
+      <p style="font-size:12px;color:#C9A84C;font-weight:600;margin-bottom:4px">A unit of Seervi Gems &amp; Jewellery Pvt. Ltd.</p>
+      <p style="font-size:11px;color:#A89F8C;margin-bottom:20px;line-height:1.5">AI-powered Jewellery Price Transparency Platform</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏅</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">CIN Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">CIN: U46498KA2025PTC201125</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">📋</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">GST Registered</div><div style="font-size:12px;color:#F5F0E8;font-family:monospace">GST: 29ABPCS8890K1Z4</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#1A1A1A;border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:10px 12px">
+          <span style="font-size:16px">🏛</span>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8B6914;margin-bottom:2px">BIS Hallmark</div><div style="font-size:12px;color:#F5F0E8">Authorised Jeweller</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links Grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Our Services</div>
+        <a href="/"                   style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🔍 Price Comparison</a>
+        <a href="/catalogue.html"     style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">📖 Jewellery Catalogue</a>
+        <a href="/exchange.html"      style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">♻️ Old Gold Exchange</a>
+        <a href="/digital-gold.html"  style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">🥇 Digital Gold</a>
+        <a href="/saving-scheme.html" style="display:block;font-size:13px;color:#A89F8C;text-decoration:none;margin-bottom:9px;line-height:1.4">💰 Gold Saving Scheme</a>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Contact Us</div>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📞 <a href="tel:+919509458270" style="color:#A89F8C;text-decoration:none">+91 95094 58270</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">💬 <a href="https://wa.me/919509458270" style="color:#A89F8C;text-decoration:none" target="_blank">WhatsApp Us</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-bottom:9px;line-height:1.4">📧 <a href="mailto:info@saheehisab.ai" style="color:#A89F8C;text-decoration:none">info@saheehisab.ai</a></p>
+        <p style="font-size:13px;color:#A89F8C;margin-top:4px;line-height:1.4">🕐 Mon–Sat: 10AM – 7PM</p>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C9A84C;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.15)">Head Office</div>
+        <p style="font-size:13px;color:#A89F8C;line-height:1.8">
+          <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong><br/>
+          Second Floor, Shop No. 203, Bhikshu Tower,<br/>
+          No.12, Byatappa Lane, Ganigarpet, Nagarathpete, Bengaluru, Karnataka 560002<br/>
+          India
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#0A0A0A;border-top:1px solid rgba(201,168,76,.08);padding:16px 24px;text-align:center;font-size:11px;color:#A89F8C;line-height:1.8">
+    <p>© 2024 Saheehisab AI &nbsp;·&nbsp; A unit of <strong style="color:#F5F0E8">Seervi Gems &amp; Jewellery Pvt. Ltd.</strong> &nbsp;·&nbsp; All Rights Reserved</p>
+    <p>GST: 29ABPCS8890K1Z4 &nbsp;·&nbsp; CIN: U46498KA2025PTC201125 &nbsp;·&nbsp; Prices are estimates based on live MCX rates. Always verify before purchase.</p>
+  </div>
+</footer>
+</body>
+</html>

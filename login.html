@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saheehisab AI — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--black:#0A0A0A;--black-2:#111;--black-3:#1A1A1A;--gold:#C9A84C;--gold-l:#E2C27D;--gold-dim:#8B6914;--gold-bg:#1C1608;--white:#F5F0E8;--white-dim:#A89F8C;--green:#4CAF7D;--red:#E05050;--font-d:'Cormorant Garamond',serif;--font-b:'Inter',sans-serif;--r:10px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--black);color:var(--white);font-family:var(--font-b);font-size:14px;-webkit-font-smoothing:antialiased;min-height:100vh}
+    body::before{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+    /* NAV */
+    nav{background:rgba(10,10,10,.96);border-bottom:1px solid rgba(201,168,76,.15);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+    .logo{font-family:var(--font-d);font-size:22px;color:var(--white)}.logo em{color:var(--gold);font-style:italic}
+    .btn-back{font-size:12px;color:var(--white-dim);border:1px solid rgba(201,168,76,.2);padding:7px 14px;border-radius:var(--r);text-decoration:none;transition:.2s}
+    .btn-back:hover{color:var(--gold);border-color:var(--gold)}
+
+    /* ── AUTH PAGES ── */
+    .auth-wrap{min-height:calc(100vh - 46px);display:flex;align-items:center;justify-content:center;padding:32px 20px}
+    .auth-box{width:100%;max-width:440px}
+    .auth-logo{text-align:center;margin-bottom:28px}
+    .auth-logo .bigmark{font-size:40px;color:var(--gold)}
+    .auth-logo h1{font-family:var(--font-d);font-size:28px;color:var(--white);margin-top:6px}
+    .auth-logo p{font-size:13px;color:var(--white-dim);margin-top:4px}
+    .auth-card{background:var(--black-2);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:32px}
+    .auth-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,.1);margin-bottom:24px}
+    .auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:var(--white-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s}
+    .auth-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .ff{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .ff label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--white-dim)}
+    .ff input,.ff select{padding:12px 14px;background:var(--black-3);border:1px solid rgba(201,168,76,.18);border-radius:var(--r);color:var(--white);font-family:var(--font-b);font-size:14px;outline:none;transition:.2s;width:100%}
+    .ff input:focus,.ff select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+    .ff input::placeholder{color:var(--white-dim);opacity:.4}
+    .ff-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .ff-row .ff{margin-bottom:0}
+    .btn-gold{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);border:none;border-radius:var(--r);font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.04em}
+    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.3)}
+    .btn-gold:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .hint{font-size:11px;color:var(--white-dim);text-align:center;margin-top:10px;line-height:1.5;opacity:.7}
+    .auth-benefits{margin-top:20px;padding-top:20px;border-top:1px solid rgba(201,168,76,.1)}
+    .benefit{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--white-dim);margin-bottom:8px}
+    .benefit span{font-size:15px}
+
+    /* ── DASHBOARD ── */
+    .dashboard{display:none;max-width:900px;margin:0 auto;padding:32px 20px 80px}
+    .dashboard.visible{display:block}
+
+    /* Profile hero */
+    .profile-hero{background:linear-gradient(135deg,var(--gold-bg),#1f1900);border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:28px;margin-bottom:24px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden}
+    .profile-hero::before{content:'◆';position:absolute;right:20px;top:-10px;font-size:110px;color:rgba(201,168,76,.05);pointer-events:none}
+    .avatar{width:68px;height:68px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:30px;font-weight:600;color:var(--black);flex-shrink:0}
+    .profile-info{flex:1}
+    .profile-name{font-family:var(--font-d);font-size:26px;color:var(--white);margin-bottom:3px}
+    .profile-phone{font-size:13px;color:var(--white-dim);margin-bottom:3px}
+    .profile-since{font-size:11px;color:var(--gold-dim)}
+    .profile-btns{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-sm{padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border:1px solid;font-family:var(--font-b);white-space:nowrap}
+    .btn-sm-gold{background:var(--gold-bg);border-color:rgba(201,168,76,.3);color:var(--gold)}.btn-sm-gold:hover{background:rgba(201,168,76,.15)}
+    .btn-sm-red{background:rgba(224,80,80,.08);border-color:rgba(224,80,80,.25);color:var(--red)}.btn-sm-red:hover{background:rgba(224,80,80,.15)}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+    .stat{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);padding:16px}
+    .stat-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--white-dim);margin-bottom:6px}
+    .stat-val{font-family:var(--font-d);font-size:22px;color:var(--gold);font-weight:600}
+    .stat-sub{font-size:11px;color:var(--white-dim);margin-top:2px}
+
+    /* Quick links */
+    .section-title{font-family:var(--font-d);font-size:20px;color:var(--white);margin-bottom:14px;padding-left:10px;border-left:3px solid var(--gold)}
+    .quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:24px}
+    .quick-card{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.2s;text-decoration:none}
+    .quick-card:hover{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.04)}
+    .quick-icon{font-size:20px;flex-shrink:0}
+    .quick-text{font-size:13px;font-weight:500;color:var(--white)}
+    .quick-sub{font-size:11px;color:var(--white-dim);margin-top:1px}
+    .quick-arrow{margin-left:auto;color:var(--gold-dim);font-size:12px}
+
+    /* Edit profile modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+    .modal-overlay.hidden{display:none}
+    .modal{background:var(--black-2);border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:28px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+    .modal h3{font-family:var(--font-d);font-size:22px;color:var(--white);margin-bottom:20px}
+    .modal-close{float:right;background:none;border:none;color:var(--white-dim);font-size:20px;cursor:pointer;margin-top:-4px}
+    .modal-close:hover{color:var(--red)}
+
+    /* History */
+    .history-wrap{background:var(--black-2);border:1px solid rgba(201,168,76,.1);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--black-3)}
+    th{padding:10px 14px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--white-dim);border-bottom:1px solid rgba(201,168,76,.1)}
+    td{padding:10px 14px;font-size:12px;color:var(--white);border-bottom:1px solid rgba(255,255,255,.04)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(201,168,76,.02)}
+    .empty-row{text-align:center;padding:32px;color:var(--white-dim);font-size:13px}
+
+    .hidden{display:none!important}
+    @media(max-width:600px){.ff-row{grid-template-columns:1fr}.profile-hero{flex-direction:column;text-align:center}.profile-btns{justify-content:center}.stats-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">◆ Saheehisab <em>AI</em></div>
+  <a href="/" class="btn-back" id="back-btn" style="display:none">← Back to App</a>
+</nav>
+
+<!-- AUTH SECTION -->
+<div class="auth-wrap" id="auth-section">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="bigmark">◆</div>
+      <h1>Saheehisab AI</h1>
+      <p>Jewellery Price Transparency Platform</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-reg" onclick="switchTab('register')">Create Account</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="login-form">
+        <div class="ff">
+          <label>Phone Number</label>
+          <input type="tel" id="l-phone" placeholder="+91 98765 43210" />
+        </div>
+        <div class="ff hidden" id="l-otp-wrap">
+          <label>OTP</label>
+          <input type="text" id="l-otp" placeholder="Enter 6-digit OTP" maxlength="6"
+            onkeydown="if(event.key==='Enter') handleLogin()" />
+        </div>
+        <button class="btn-gold" id="btn-login" onclick="handleLogin()">Send OTP →</button>
+        <p class="hint" id="l-hint">Enter your phone to receive a one-time password</p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="reg-form" class="hidden">
+        <div class="ff-row">
+          <div class="ff"><label>Full Name *</label><input type="text" id="r-name" placeholder="Your name" /></div>
+          <div class="ff"><label>Phone *</label><input type="tel" id="r-phone" placeholder="+91 phone" /></div>
+        </div>
+        <div class="ff"><label>Email (optional)</label><input type="email" id="r-email" placeholder="you@email.com" /></div>
+        <div class="ff-row">
+          <div class="ff"><label>City</label><input type="text" id="r-city" placeholder="Your city" /></div>
+          <div class="ff"><label>Referral Code</label><input type="text" id="r-referral" placeholder="Optional" /></div>
+        </div>
+        <div class="ff hidden" id="r-otp-wrap">
+          <label>OTP</label>
+          <input type="text" id="r-otp" placeholder="Enter 6-digit OTP" maxlength="6"
+            onkeydown="if(event.key==='Enter') handleRegister()" />
+        </div>
+        <button class="btn-gold" id="btn-reg" onclick="handleRegister()">Send OTP →</button>
+        <p class="hint" id="r-hint">Create your free account to access all features</p>
+        <div class="auth-benefits">
+          <div class="benefit"><span>🔍</span>Full price comparison on any jewellery</div>
+          <div class="benefit"><span>🥇</span>Digital Gold portfolio</div>
+          <div class="benefit"><span>💎</span>50% off making charges as member</div>
+          <div class="benefit"><span>🔔</span>Gold price alerts on WhatsApp</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+
+  <!-- Profile Hero -->
+  <div class="profile-hero">
+    <div class="avatar" id="d-avatar">?</div>
+    <div class="profile-info">
+      <div class="profile-name" id="d-name">—</div>
+      <div class="profile-phone" id="d-phone">—</div>
+      <div class="profile-since" id="d-since">Member since —</div>
+    </div>
+    <div class="profile-btns">
+      <button class="btn-sm btn-sm-gold" onclick="openEdit()">✏ Edit Profile</button>
+      <button class="btn-sm btn-sm-red" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-label">Gold Balance</div><div class="stat-val" id="d-grams">0g</div><div class="stat-sub">24K Digital Gold</div></div>
+    <div class="stat"><div class="stat-label">Gold Value</div><div class="stat-val" id="d-gold-val" style="color:var(--green)">₹0</div><div class="stat-sub">At live rate</div></div>
+    <div class="stat"><div class="stat-label">Analyses Done</div><div class="stat-val" id="d-analyses" style="color:var(--white)">0</div><div class="stat-sub">Price comparisons</div></div>
+    <div class="stat"><div class="stat-label">Total Savings</div><div class="stat-val" id="d-savings" style="color:var(--green)">₹0</div><div class="stat-sub">vs store prices</div></div>
+    <div class="stat"><div class="stat-label">Making Discount</div><div class="stat-val" style="color:var(--green)">50% OFF</div><div class="stat-sub">Member benefit</div></div>
+    <div class="stat"><div class="stat-label">City</div><div class="stat-val" id="d-city" style="font-size:16px">—</div><div class="stat-sub" id="d-email">—</div></div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="section-title">Quick Access</div>
+  <div class="quick-grid">
+    <a href="/" class="quick-card"><span class="quick-icon">🔍</span><div><div class="quick-text">Price Check</div><div class="quick-sub">Compare any link</div></div><span class="quick-arrow">→</span></a>
+    <a href="/catalogue.html" class="quick-card"><span class="quick-icon">📖</span><div><div class="quick-text">Catalogue</div><div class="quick-sub">Browse &amp; get quote</div></div><span class="quick-arrow">→</span></a>
+    <a href="/exchange.html" class="quick-card"><span class="quick-icon">♻️</span><div><div class="quick-text">Gold Exchange</div><div class="quick-sub">Check fair value</div></div><span class="quick-arrow">→</span></a>
+    <a href="/digital-gold.html" class="quick-card"><span class="quick-icon">🥇</span><div><div class="quick-text">Digital Gold</div><div class="quick-sub">Buy · Sell · Redeem</div></div><span class="quick-arrow">→</span></a>
+    <a href="/saving-scheme.html" class="quick-card"><span class="quick-icon">💰</span><div><div class="quick-text">Saving Scheme</div><div class="quick-sub">12th month FREE</div></div><span class="quick-arrow">→</span></a>
+    <div class="quick-card" onclick="openEdit()"><span class="quick-icon">👤</span><div><div class="quick-text">Edit Profile</div><div class="quick-sub">Name, email, city</div></div><span class="quick-arrow">→</span></div>
+  </div>
+
+  <!-- Analysis History -->
+  <div class="section-title">My Analysis History</div>
+  <div class="history-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Store Price</th><th>Our Price</th><th>Savings</th></tr></thead>
+      <tbody id="history-body"><tr><td colspan="6" class="empty-row">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>Edit Profile</h3>
+    <div class="ff-row">
+      <div class="ff"><label>Full Name</label><input type="text" id="e-name" /></div>
+      <div class="ff"><label>City</label><input type="text" id="e-city" /></div>
+    </div>
+    <div class="ff"><label>Email</label><input type="email" id="e-email" /></div>
+    <div class="ff-row">
+      <div class="ff"><label>Date of Birth</label><input type="date" id="e-dob" /></div>
+      <div class="ff"><label>Anniversary</label><input type="date" id="e-anniv" /></div>
+    </div>
+    <button class="btn-gold" onclick="saveProfile()">Save Changes</button>
+  </div>
+</div>
+
+<script>
+var customer   = null;
+var goldRate   = 9850;
+var loginStep  = 1;
+var regStep    = 1;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', function() {
+  // Load gold rate
+  fetch('/rates').then(function(r){return r.json();}).then(function(j){
+    if(j.success) goldRate = j.rates.gold_24k;
+  });
+
+  // Check query params
+  var params      = new URLSearchParams(window.location.search);
+  var showProfile = params.get('profile');
+  var saved       = localStorage.getItem('sh_customer');
+  var token       = localStorage.getItem('sh_token');
+
+  if (saved && token) {
+    try {
+      customer = JSON.parse(saved);
+      if (showProfile === '1') {
+        // Show profile page
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('dashboard').classList.add('visible');
+        document.getElementById('back-btn').style.display = 'block';
+        fetch('/customer/profile?phone='+encodeURIComponent(customer.phone))
+          .then(function(r){return r.json();})
+          .then(function(j){
+            if(j.success){ customer=j.customer; localStorage.setItem('sh_customer',JSON.stringify(customer)); }
+            renderDashboard(); loadHistory();
+          }).catch(function(){ renderDashboard(); loadHistory(); });
+        return;
+      }
+      // Already logged in, not profile page — go home
+      window.location.replace('/');
+      return;
+    } catch(e) {
+      localStorage.removeItem('sh_customer');
+      localStorage.removeItem('sh_token');
+    }
+  }
+
+  // Check URL for ?next= redirect
+  var ref = new URLSearchParams(window.location.search).get('ref');
+  if (ref) {
+    var refEl = document.getElementById('r-referral');
+    if (refEl) { refEl.value = ref; switchTab('register'); }
+  }
+});
+
+// ── Tab switch ────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-reg').classList.toggle('active', tab==='register');
+  document.getElementById('login-form').classList.toggle('hidden', tab!=='login');
+  document.getElementById('reg-form').classList.toggle('hidden', tab!=='register');
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function handleLogin() {
+  var phone = (document.getElementById('l-phone').value||'').trim();
+  var btn   = document.getElementById('btn-login');
+  if (loginStep===1) {
+    if (!phone||phone.length<10){alert('Enter valid phone number');return;}
+    btn.disabled=true; btn.textContent='Sending…';
+    var res  = await fetch('/customer/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone})});
+    var json = await res.json();
+    btn.disabled=false;
+    if(json.success){
+      loginStep=2;
+      document.getElementById('l-otp-wrap').classList.remove('hidden');
+      document.getElementById('l-hint').textContent='OTP sent to '+phone+'. Demo: '+json.demo_otp;
+      btn.textContent='Verify & Sign In →';
+    } else { alert(json.error||'Failed'); btn.textContent='Send OTP →'; }
+  } else {
+    var otp = (document.getElementById('l-otp').value||'').trim();
+    if(!otp){alert('Enter OTP');return;}
+    btn.disabled=true; btn.textContent='Verifying…';
+    var res2  = await fetch('/customer/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone,otp:otp})});
+    var json2 = await res2.json();
+    btn.disabled=false; btn.textContent='Verify & Sign In →';
+    if(json2.success){ setCustomer(json2.customer, json2.token); showDashboard(); }
+    else { alert(json2.error||'Invalid OTP'); }
+  }
+}
+
+// ── Register ──────────────────────────────────────────────────────────────────
+async function handleRegister() {
+  var name  = (document.getElementById('r-name').value||'').trim();
+  var phone = (document.getElementById('r-phone').value||'').trim();
+  var btn   = document.getElementById('btn-reg');
+  if (regStep===1) {
+    if(!name||!phone||phone.length<10){alert('Name and phone required');return;}
+    btn.disabled=true; btn.textContent='Sending…';
+    var res  = await fetch('/customer/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name:name, phone:phone,
+      email:document.getElementById('r-email').value.trim(),
+      city:document.getElementById('r-city').value.trim(),
+      referral:document.getElementById('r-referral').value.trim(),
+    })});
+    var json = await res.json();
+    btn.disabled=false;
+    if(json.success){
+      regStep=2;
+      document.getElementById('r-otp-wrap').classList.remove('hidden');
+      document.getElementById('r-hint').textContent='OTP sent! Demo: '+json.demo_otp;
+      btn.textContent='Verify & Create Account →';
+    } else { alert(json.error||'Failed'); btn.textContent='Send OTP →'; }
+  } else {
+    var otp=(document.getElementById('r-otp').value||'').trim();
+    if(!otp){alert('Enter OTP');return;}
+    btn.disabled=true; btn.textContent='Creating…';
+    var res2  = await fetch('/customer/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone,otp:otp})});
+    var json2 = await res2.json();
+    btn.disabled=false; btn.textContent='Verify & Create Account →';
+    if(json2.success){ setCustomer(json2.customer, json2.token); showDashboard(); }
+    else { alert(json2.error||'Invalid OTP'); }
+  }
+}
+
+// ── Set customer session ──────────────────────────────────────────────────────
+function setCustomer(c, token) {
+  customer = c;
+  // Save BOTH token and customer synchronously before any redirect
+  if (token) {
+    localStorage.setItem('sh_token', token);
+    document.cookie = 'sh_token=' + token + '; path=/; max-age=2592000; SameSite=Lax';
+  }
+  localStorage.setItem('sh_customer', JSON.stringify(c));
+}
+
+// ── Show dashboard ────────────────────────────────────────────────────────────
+async function showDashboard() {
+  // Verify token was saved
+  var saved = localStorage.getItem('sh_token');
+  if (!saved) {
+    alert('Login error: token not saved. Please try again.');
+    return;
+  }
+  // Small delay to ensure localStorage is written
+  setTimeout(function() {
+    window.location.replace('/');
+  }, 200);
+}
+
+function renderDashboard() {
+  var c     = customer;
+  var grams = parseFloat(c.gold_grams||0);
+  var val   = grams * goldRate;
+  var since = new Date(c.member_since||c.created_at||Date.now());
+
+  document.getElementById('d-avatar').textContent   = (c.name||'U').charAt(0).toUpperCase();
+  document.getElementById('d-name').textContent      = c.name||'—';
+  document.getElementById('d-phone').textContent     = c.phone||'—';
+  document.getElementById('d-since').textContent     = 'Member since ' + since.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  document.getElementById('d-grams').textContent     = grams.toFixed(4)+'g';
+  document.getElementById('d-gold-val').textContent  = '₹'+Math.round(val).toLocaleString('en-IN');
+  document.getElementById('d-analyses').textContent  = c.analyses_count||0;
+  document.getElementById('d-savings').textContent   = '₹'+Math.round(c.savings_shown||0).toLocaleString('en-IN');
+  document.getElementById('d-city').textContent      = c.city||'India';
+  document.getElementById('d-email').textContent     = c.email||'';
+
+  // Pre-fill edit form
+  document.getElementById('e-name').value  = c.name||'';
+  document.getElementById('e-city').value  = c.city||'';
+  document.getElementById('e-email').value = c.email||'';
+  document.getElementById('e-dob').value   = c.dob||'';
+  document.getElementById('e-anniv').value = c.anniversary||'';
+}
+
+async function loadHistory() {
+  try {
+    var res  = await fetch('/customer/history?phone='+encodeURIComponent(customer.phone));
+    var json = await res.json();
+    var tbody = document.getElementById('history-body');
+    if(!json.success||!json.history.length){
+      tbody.innerHTML='<tr><td colspan="6" class="empty-row">No analyses yet. <a href="/" style="color:var(--gold)">Start comparing →</a></td></tr>';
+      return;
+    }
+    tbody.innerHTML = json.history.map(function(h){
+      var dt  = new Date(h.timestamp).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+      var prd = (h.product_name||'Product').slice(0,28);
+      var sav = parseFloat(h.estimated_savings)||0;
+      return '<tr>'+
+        '<td style="color:var(--white-dim)">'+dt+'</td>'+
+        '<td>'+prd+'</td>'+
+        '<td style="font-size:11px;color:var(--white-dim)">'+(h.jewellery_type||'—')+'</td>'+
+        '<td>'+(h.website_price?'₹'+parseFloat(h.website_price).toLocaleString('en-IN'):'—')+'</td>'+
+        '<td style="color:var(--gold)">'+(h.saheehisab_price?'₹'+parseFloat(h.saheehisab_price).toLocaleString('en-IN'):'—')+'</td>'+
+        '<td style="color:var(--green)">'+(sav>0?'+₹'+Math.round(sav).toLocaleString('en-IN'):'—')+'</td>'+
+      '</tr>';
+    }).join('');
+  } catch(e){}
+}
+
+// ── Edit Profile ──────────────────────────────────────────────────────────────
+function openEdit() { document.getElementById('edit-modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+document.getElementById('edit-modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+async function saveProfile() {
+  var payload = {
+    phone      : customer.phone,
+    name       : document.getElementById('e-name').value.trim(),
+    city       : document.getElementById('e-city').value.trim(),
+    email      : document.getElementById('e-email').value.trim(),
+    dob        : document.getElementById('e-dob').value,
+    anniversary: document.getElementById('e-anniv').value,
+  };
+  var res  = await fetch('/customer/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  var json = await res.json();
+  if(json.success){
+    customer = json.customer;
+    localStorage.setItem('sh_customer', JSON.stringify(customer));
+    closeModal();
+    renderDashboard();
+    showToast('✓ Profile updated');
+  } else { alert(json.error||'Update failed'); }
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+async function logout() {
+  if(!confirm('Sign out of your account?')) return;
+  var token = localStorage.getItem('sh_token');
+  await fetch('/customer/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token})}).catch(function(){});
+  localStorage.removeItem('sh_customer');
+  localStorage.removeItem('sh_token');
+  document.cookie = 'sh_token=; path=/; max-age=0';
+  window.location.reload();
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style,{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'var(--gold)',color:'var(--black)',padding:'10px 22px',borderRadius:'100px',fontSize:'13px',fontWeight:'600',zIndex:'9999'});
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2500);
+}
+</script>
+</body>
+</html>
